@@ -1,4 +1,4 @@
-using Fusion;
+using Unity.Netcode;
 using UnityEngine;
 
 public class Movement : NetworkBehaviour
@@ -6,7 +6,7 @@ public class Movement : NetworkBehaviour
     // Make sure you specify private, public and protected so that it's easy for both of us to understand
     [SerializeField] private CharacterController characterController;
 
-    [SerializeField] private float Speed;
+    [SerializeField] private float speed;
 
     private void Start()
     {
@@ -15,20 +15,25 @@ public class Movement : NetworkBehaviour
 
     // TODO: Functionality for the car's control
     // What I have done is for testing only (if possible use the new input system)
-    public override void FixedUpdateNetwork()
+    private void Update()
     {
-        if (!HasStateAuthority) { return; } // This make sure that a player cannot affect others
+        if (!IsOwner) { return; } // This make sure that a player cannot affect others
 
-        float Horizontal = Input.GetAxis("Horizontal");
-        float Vertical = Input.GetAxis("Vertical");
+        MovePlayer();
+    }
 
-        Vector3 Movement = Runner.DeltaTime * Speed * new Vector3(Horizontal, 0.0f, Vertical); // We have to use Runner.DeltaTime instead of Time.DeltaTime
+    private void MovePlayer()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
-        characterController.Move(Movement);
+        Vector3 movement = Time.deltaTime * speed * new Vector3(horizontal, 0.0f, vertical); // We have to use Runner.DeltaTime instead of Time.DeltaTime
 
-        if (Movement != Vector3.zero)
+        characterController.Move(movement);
+
+        if (movement != Vector3.zero)
         {
-            this.gameObject.transform.forward = Movement;
+            this.gameObject.transform.forward = movement;
         }
     }
 }
