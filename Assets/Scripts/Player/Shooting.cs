@@ -5,7 +5,7 @@ public class Shooting : NetworkBehaviour
 {
     [SerializeField] private GameObject bullet;
 
-    public void FixedUpdate()
+    public void Update()
     {
         if (!IsOwner) { return; }
 
