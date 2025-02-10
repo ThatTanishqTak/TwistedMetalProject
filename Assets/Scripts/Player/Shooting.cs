@@ -3,23 +3,30 @@ using UnityEngine;
 
 public class Shooting : NetworkBehaviour
 {
-    [SerializeField] private GameObject bullet;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private float bulletSpeed;
 
-    public void Update()
+    private void Update()
     {
         if (!IsOwner) { return; }
 
-        Shoot();
+        //Shoot();
     }
 
     private void Shoot()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 direction = Vector3.forward;
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
-            Instantiate(bullet);
-            bullet.GetComponent<Rigidbody>().AddForce(direction, ForceMode.Impulse);
+            Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+
+            // Apply force to the bullet to make it move forward
+            bulletRb.linearVelocity = firePoint.forward * bulletSpeed;
+
+            // Optional: Destroy the bullet after a certain time to clean up
+            Destroy(bullet, 3f);
         }
     }
 }

@@ -27,13 +27,9 @@ public class Movement : NetworkBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 movement = Time.deltaTime * speed * new Vector3(horizontal, 0.0f, vertical); // We have to use Runner.DeltaTime instead of Time.DeltaTime
+        Vector3 movement = Time.deltaTime * speed * new Vector3(horizontal, 0.0f, vertical);
 
         characterController.Move(movement);
-
-        if (movement != Vector3.zero)
-        {
-            this.gameObject.transform.forward = movement;
-        }
+        if (movement != Vector3.zero) { this.gameObject.transform.forward = movement; }
     }
 }
