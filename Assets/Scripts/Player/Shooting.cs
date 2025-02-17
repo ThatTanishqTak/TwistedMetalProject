@@ -1,6 +1,8 @@
 using Unity.Netcode;
 using UnityEngine;
 
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+
 public class Shooting : NetworkBehaviour
 {
     [SerializeField] private GameObject bulletPrefab;

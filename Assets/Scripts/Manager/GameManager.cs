@@ -2,12 +2,16 @@ using Unity.Netcode;
 using UnityEngine;
 using static GameManager;
 
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+
 public class GameManager : NetworkBehaviour
 {
-    public enum PlayerRoles { Driver, Shooter }
-    public enum Teams { Team_1, Team_2 }
+    [SerializeField] public enum PlayerRoles { Driver, Shooter }
+    [SerializeField] public enum Teams { Team_1, Team_2 }
+    //[SerializeField] public enum GameModes { GameMode, GameMode2 }
 
-    public NetworkVariable<int> currentRound = new(1);
+    [SerializeField] private NetworkVariable<int> maxRound = new(4);
+    [SerializeField] private NetworkVariable<int> currentRound = new(1);
 
     [SerializeField] private bool isTeamCreated = false;
 
@@ -19,7 +23,6 @@ public class GameManager : NetworkBehaviour
 
     private void CreateTeams()
     {
-        Debug.Log("Creating Teams!");
         int index = 0;
 
         foreach(var client in NetworkManager.Singleton.ConnectedClients.Values)
@@ -27,11 +30,9 @@ public class GameManager : NetworkBehaviour
             PlayerController player = client.PlayerObject.GetComponent<PlayerController>();
             Debug.Log(index);
 
-            if (index < 2) { player.teams.Value = Teams.Team_1; }
-            else { player.teams.Value = Teams.Team_2; }
-
-            if (currentRound.Value == 1) { player.roles.Value = (index % 2 == 0) ? PlayerRoles.Driver : PlayerRoles.Shooter; }
-            else { player.roles.Value = (index % 2 == 0) ? PlayerRoles.Shooter : PlayerRoles.Driver; }
+            player.teams.Value = index < 2 ? Teams.Team_1 : Teams.Team_2;
+            player.roles.Value = currentRound.Value == 1 ? (index % 2 == 0 ? PlayerRoles.Driver : PlayerRoles.Shooter)
+                                                         : (index % 2 == 0 ? PlayerRoles.Shooter : PlayerRoles.Driver);
 
             index++;
         }
@@ -42,7 +43,15 @@ public class GameManager : NetworkBehaviour
     [ServerRpc]
     public void StartNextRoundServerRpc()
     {
-        currentRound.Value++;
-        CreateTeams();
+        if (currentRound.Value <= maxRound.Value)
+        {
+            currentRound.Value++;
+            CreateTeams();
+        }
+
+        else
+        {
+            // End Game State
+        }
     }
 }

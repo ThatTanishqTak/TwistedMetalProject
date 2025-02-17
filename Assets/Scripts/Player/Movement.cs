@@ -1,6 +1,8 @@
 using Unity.Netcode;
 using UnityEngine;
 
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+
 public class Movement : NetworkBehaviour
 {
     // Make sure you specify private, public and protected so that it's easy for both of us to understand
