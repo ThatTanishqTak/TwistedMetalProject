@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class Shooting : NetworkBehaviour
 {
-    [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private Transform firePoint;
-    [SerializeField] private float bulletSpeed;
+   // [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform shootPoint;
+   // [SerializeField] private float bulletSpeed;
+
 
     private void Update()
     {
@@ -16,19 +17,22 @@ public class Shooting : NetworkBehaviour
         //Shoot();
     }
 
-    private void Shoot()
+    private void Shoot() 
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)) //Raycast hit and debug the object name.
         {
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+            RaycastHit hit;
+            Physics.Raycast(shootPoint.position, transform.forward, out hit, 100f);
+            Debug.DrawLine(shootPoint.position, hit.point, Color.red, 2f);
+            // GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
-            Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+            //Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
 
             // Apply force to the bullet to make it move forward
-            bulletRb.linearVelocity = firePoint.forward * bulletSpeed;
+            //bulletRb.linearVelocity = firePoint.forward * bulletSpeed;
 
             // Optional: Destroy the bullet after a certain time to clean up
-            Destroy(bullet, 3f);
+            // Destroy(bullet, 3f);
         }
     }
 }
