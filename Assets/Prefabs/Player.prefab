@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6073195497378851525}
   - component: {fileID: 6877890420544650757}
-  - component: {fileID: 1074019874208005881}
   - component: {fileID: 6715638234862055633}
   - component: {fileID: 8598721422553887990}
   m_Layer: 0
@@ -61,21 +60,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &1074019874208005881
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1522015395370505475}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fd62407a28b54c47801bea5829c9109, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  characterController: {fileID: 8598721422553887990}
-  speed: 5
 --- !u!114 &6715638234862055633
 MonoBehaviour:
   m_ObjectHideFlags: 0
