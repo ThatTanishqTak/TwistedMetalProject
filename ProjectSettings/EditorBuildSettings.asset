@@ -5,12 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/TEST (Will delete after game is done).unity
-    guid: 525ca19f40bff2e47b960a19e0a68315
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: b0c490940ef5bf94faf434211efeda16
+  - enabled: 1
+    path: Assets/Scenes/CharacterSelect.unity
+    guid: cdba46ee1482af64282cbc1e9ce97898
   - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: 50a0bb80099893547883add4eede6874
