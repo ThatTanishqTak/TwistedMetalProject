@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2820221200767095953
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 9
+--- !u!114 &-1933238750133261275
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da692e001514ec24dbc4cca1949ff7e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 11
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 4Cells_chess_violet
+  m_Shader: {fileID: -6465566751694194690, guid: 25096cc823012c14e846190de786a755, type: 3}
+  m_Parent: {fileID: 2100000, guid: 1a65ae2b6bfb5c04caabad12912adc08, type: 2}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _DISABLE_SSR_TRANSPARENT
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    MotionVector: User
+  disabledShaderPasses:
+  - TransparentBackface
+  - MOTIONVECTORS
+  - TransparentDepthPrepass
+  - TransparentDepthPostpass
+  - RayTracingPrepass
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Texture2D_4f6d5548e8ad4a7d9dcd2592726e1879:
+        m_Texture: {fileID: 2800000, guid: b5953f23c7c216a4ea01720fb7fb5362, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_d19791cf7a874067bbcf696df741b242:
+        m_Texture: {fileID: 2800000, guid: 7c777d75150ae6646915bdf3000acde2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Boolean_0a5be01eb5a64018bea328348e70ad29: 0
+    - Boolean_15cb3704bf74416788bc2d112a6ac759: 1
+    - Vector1_1f2e805564624a7e9de49769cffb3516: 1.5
+    - Vector1_460ffa4bae104b48914a44b28551646f: 1000
+    - Vector1_49788e15aefd43d4b3665cea74fcc218: 5000
+    - Vector1_73a3546e2538467c90505ad6740fd615: 2
+    m_Colors:
+    - Color_1: {r: 1, g: 0.9815198, b: 0, a: 0}
+    - Color_1d2e51f2e41f4b9aa299c21b9e01bce9: {r: 0.5102067, g: 0, b: 0.764151, a: 0}
+    - Color_af7d49c74ee94c3da55c0b443056f361: {r: 0.81527376, g: 0, b: 1, a: 0}
+    - Color_e721205f01134817a55c87ba777f7c1f: {r: 1, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

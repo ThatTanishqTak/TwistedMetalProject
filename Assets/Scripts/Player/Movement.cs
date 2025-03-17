@@ -65,10 +65,10 @@ public class Movement : NetworkBehaviour
                 else if (mesh.parent.name.Contains("RR")) rimMeshes[3] = mesh;
             }
         }
-        for (int i = 0; i < 4; i++)
-        {
-            Debug.Log($"Tire {i}: {tireMeshes[i]?.name}, Rim {i}: {rimMeshes[i]?.name}");
-        }
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    Debug.Log($"Tire {i}: {tireMeshes[i]?.name}, Rim {i}: {rimMeshes[i]?.name}");
+        //}
     }
     // TODO: Functionality for the car's control
     // What I have done is for testing only (if possible use the new input system)
@@ -135,7 +135,7 @@ public class Movement : NetworkBehaviour
         if (Input.GetAxis("Vertical") == 0 && carRigidbody.angularVelocity.magnitude < 0.2f)
         {
             carRigidbody.angularVelocity = Vector3.zero;
-            Debug.Log(carRigidbody.angularVelocity);
+           // Debug.Log(carRigidbody.angularVelocity);
         }
         else if (Input.GetAxis("Vertical") == 0)
         {
