@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/TEST (Will delete after game is done).unity
     guid: 525ca19f40bff2e47b960a19e0a68315
   - enabled: 1
-    path: Assets/Scenes/Menu.unity
-    guid: 98df10174f976a04ebe22826899cc19d
+    path: Assets/Scenes/MainMenu.unity
+    guid: b0c490940ef5bf94faf434211efeda16
   - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: 50a0bb80099893547883add4eede6874
