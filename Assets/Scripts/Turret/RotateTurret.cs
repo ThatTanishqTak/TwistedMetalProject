@@ -11,7 +11,7 @@ public class RotateTurret : MonoBehaviour
 
     void Start()
     {
-        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.Locked;
         turretBase = GetComponent<Transform>();
         gunTransform = turretBase.Find("canon_lvl_1");
 
