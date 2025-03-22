@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerMovement_Test : MonoBehaviour
+public class PlayerMovement_Test : NetworkBehaviour
 {
     private CharacterController characterController;
     private float moveSpeed = 2.0f;
@@ -12,6 +13,10 @@ public class PlayerMovement_Test : MonoBehaviour
 
     private void Update()
     {
+        if (!IsOwner)
+        {
+            return;
+        }
         Vector3 move = new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         characterController.Move(moveSpeed * Time.deltaTime * move);
