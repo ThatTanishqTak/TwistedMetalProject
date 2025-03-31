@@ -2,6 +2,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+
 public class CreateLobbyUI : MonoBehaviour
 {
     [SerializeField] private Button createLobby;
@@ -13,7 +15,14 @@ public class CreateLobbyUI : MonoBehaviour
     {
         createLobby.onClick.AddListener(() =>
         {
-            GameLobby.Instance.CreateLobby(lobbyName.text, 4, true);
+            if (int.TryParse(maxPlayers.text, out int playerCount))
+            {
+                GameLobby.Instance.CreateLobby(lobbyName.text, playerCount, true);
+            }
+            else
+            {
+                Debug.LogError("Invalid player count entered. Please enter a valid number.");
+            }
         });
     }
 }

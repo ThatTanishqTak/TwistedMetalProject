@@ -13,10 +13,11 @@ public class PlayerMovement_Test : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner)
+        if (!IsClient || IsOwner)
         {
             return;
         }
+
         Vector3 move = new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
         characterController.Move(moveSpeed * Time.deltaTime * move);

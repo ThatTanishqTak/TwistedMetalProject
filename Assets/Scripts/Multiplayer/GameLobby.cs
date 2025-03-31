@@ -4,6 +4,8 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+
 public class GameLobby : MonoBehaviour
 {
     public static GameLobby Instance { get; private set; }

@@ -39,6 +39,7 @@ public class CharacterReady : NetworkBehaviour
             if (!playerReadyDictionary.ContainsKey(clientID) || !playerReadyDictionary[clientID])
             {
                 allClientReady = false;
+
                 break;
             }
         }
