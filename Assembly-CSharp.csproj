@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Core\Interfaces\ICarMovement.cs" />
+    <Compile Include="Assets\PROMETEO - Car Controller\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Player\TeamRoleData.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\JoinLobbyUI.cs" />
@@ -72,10 +73,12 @@
     <Compile Include="Assets\Scripts\Gameplay\Car\CarControllerWrapper.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerVisual.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\LobbyUI.cs" />
+    <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoTouchInput.cs" />
     <Compile Include="Assets\Scripts\Manager\CharacterSelect.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterSelectUI.cs" />
     <Compile Include="Assets\Scripts\Manager\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\NetworkUI.cs" />
+    <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoCarController.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement_Test.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterReady.cs" />
@@ -103,6 +106,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
+    <None Include="Assets\PROMETEO - Car Controller\Fonts\Licence.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
   </ItemGroup>
   <ItemGroup>

@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface ICarMovement
 {
-    void move(float throttle, float steering);
+    void Move(float throttle, float steering);
 }
