@@ -15,5 +15,5 @@ MonoBehaviour:
   weaponName: Rifle
   projectilePrefab: {fileID: 1417354961124940904, guid: 62b7e8b89bf48414e95de6d455a85149, type: 3}
   fireRate: 0.1
-  fireForce: 1000
+  fireForce: 15
   ammo: -1

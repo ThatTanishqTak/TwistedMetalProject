@@ -9,7 +9,7 @@ public class Shooter : MonoBehaviour
     {
         if (!isShooterControlled) return;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             Debug.Log("Mouse Clicked");
             gun.Fire();

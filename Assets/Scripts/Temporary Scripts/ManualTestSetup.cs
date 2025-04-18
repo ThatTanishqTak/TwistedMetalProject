@@ -31,7 +31,5 @@ public class ManualTestSetup : MonoBehaviour
         car.AssignDriver(0);
         turret.AssignShooter(true);
         shooter.SetShooterAuthority(true);
-
-        /
     }
 }

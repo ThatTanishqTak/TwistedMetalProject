@@ -15,34 +15,23 @@ public class Gun : MonoBehaviour, IShooter
     public void Fire()
     {
         if (Time.time < lastFireTime + gunStats.fireRate)
-        {
             return;
-        }
 
-        if (bulletPrefab == null)
-        {
-            Debug.LogError("bulletPrefab Missing");
-        }
-        else if (shootPoint == null) {
-            Debug.Log("shootPoint Missing");
-        }
-
-            GameObject bullet = Instantiate(gunStats.projectilePrefab, shootPoint.position, shootPoint.rotation);
+        GameObject bullet = Instantiate(gunStats.projectilePrefab, shootPoint.position, shootPoint.rotation);
 
         if (bullet.TryGetComponent(out Rigidbody rb))
         {
-            rb.AddForce(shootPoint.forward * gunStats.fireRate, ForceMode.Impulse);
+            rb.linearVelocity = shootPoint.forward * gunStats.fireForce; // ← correct usage
         }
         else
         {
-            Debug.LogWarning("Bullet prefab does not have a Rigidbody component.");
+            Debug.LogWarning("no Rigidbody on the bullet found");
         }
 
         lastFireTime = Time.time;
-
-        Debug.Log("Bullet Fired!");
-        OnFire?.Invoke(); // For future muzzle flash, sounds etc.
+        OnFire?.Invoke();
     }
+
 
     public void SetStats(GunStats newStats) {
         gunStats = newStats;
