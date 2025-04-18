@@ -74,8 +74,11 @@
     <Compile Include="Assets\Scripts\Player\PlayerVisual.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\LobbyUI.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoTouchInput.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Turret\TurretController.cs" />
     <Compile Include="Assets\Scripts\Manager\CharacterSelect.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterSelectUI.cs" />
+    <Compile Include="Assets\Scripts\Core\Interfaces\CarAdapter.cs" />
+    <Compile Include="Assets\Scripts\Temporary Scripts\ManualTestSetup.cs" />
     <Compile Include="Assets\Scripts\Manager\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\NetworkUI.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoCarController.cs" />

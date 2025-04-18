@@ -7,7 +7,7 @@ public class CarControllerWrapper : NetworkBehaviour
     private ICarMovement carMovement;
     private ulong drivingClientId;
 
-    private void AssignDriver(ulong clientId) {
+    public void AssignDriver(ulong clientId) {
         drivingClientId = clientId;
     }
 
@@ -18,15 +18,20 @@ public class CarControllerWrapper : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner || NetworkManager.Singleton.LocalClientId != drivingClientId)
-        {
-            return;
-        }
-        else {
-            float throttle = Input.GetAxis("Vertical");
-            float steering = Input.GetAxis("Horizontal");
+        ///if (!IsOwner || NetworkManager.Singleton.LocalClientId != drivingClientId)
+        ///{
+        ///   return;
+        /// }
+        /// else {
+        Debug.Log("Wrapper Running"); 
+        float throttle = Input.GetAxis("Vertical");
+        float steering = Input.GetAxis("Horizontal");
+        bool handbrake = Input.GetKey(KeyCode.Space);
 
-            carMovement.Move(throttle, steering);
-        }
+        carMovement?.Move(throttle, steering);
+        carMovement?.ApplyHandbrake(handbrake);
+
+        carMovement.Move(throttle, steering);
+       /// }
     }
 }

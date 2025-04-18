@@ -1,10 +1,7 @@
-﻿// MODIFIED VERSION FOR MULTIPLAYER USE
-// Cleaned up input handling, kept core driving and audio logic
-
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PrometeoCarController : MonoBehaviour
+public class PrometeoCarController : MonoBehaviour, ICarMovement
 {
     [Header("Car Settings")]
     public int maxSpeed = 90;
@@ -47,22 +44,17 @@ public class PrometeoCarController : MonoBehaviour
     private Rigidbody carRigidbody;
     private float steeringAxis;
     private float throttleAxis;
-    private float driftingAxis;
     private float localVelocityZ;
     private float localVelocityX;
     private bool deceleratingCar;
 
-    private WheelFrictionCurve FLwheelFriction;
-    private float FLWextremumSlip;
-    private WheelFrictionCurve FRwheelFriction;
-    private float FRWextremumSlip;
-    private WheelFrictionCurve RLwheelFriction;
-    private float RLWextremumSlip;
-    private WheelFrictionCurve RRwheelFriction;
-    private float RRWextremumSlip;
+    private WheelFrictionCurve FLFriction, FRFriction, RLFriction, RRFriction;
+    private float FLSlip, FRSlip, RLSlip, RRSlip;
 
     private void Start()
     {
+        Debug.Log("Car Controller Initialized");
+
         carRigidbody = GetComponent<Rigidbody>();
         carRigidbody.centerOfMass = bodyMassCenter;
 
@@ -74,10 +66,7 @@ public class PrometeoCarController : MonoBehaviour
             InvokeRepeating(nameof(CarSounds), 0f, 0.1f);
         }
 
-        if (!useEffects)
-        {
-            StopAllEffects();
-        }
+        if (!useEffects) StopAllEffects();
     }
 
     private void Update()
@@ -114,6 +103,13 @@ public class PrometeoCarController : MonoBehaviour
             }
         }
     }
+    private void HandleSteering(float steerInput)
+    {
+        steeringAxis = Mathf.Clamp(steerInput, -1f, 1f);
+        float targetAngle = steeringAxis * maxSteeringAngle;
+        frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, targetAngle, steeringSpeed);
+        frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, targetAngle, steeringSpeed);
+    }
 
     public void ApplyHandbrake(bool active)
     {
@@ -128,12 +124,116 @@ public class PrometeoCarController : MonoBehaviour
         }
     }
 
-    private void HandleSteering(float steerInput)
+    public void Steer(float value)
     {
-        steeringAxis = Mathf.Clamp(steerInput, -1f, 1f);
-        float targetAngle = steeringAxis * maxSteeringAngle;
-        frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, targetAngle, steeringSpeed);
-        frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, targetAngle, steeringSpeed);
+        float angle = Mathf.Clamp(value, -1f, 1f) * maxSteeringAngle;
+        frontLeftCollider.steerAngle = Mathf.Lerp(frontLeftCollider.steerAngle, angle, steeringSpeed);
+        frontRightCollider.steerAngle = Mathf.Lerp(frontRightCollider.steerAngle, angle, steeringSpeed);
+    }
+
+    public void GoForward()
+    {
+        if (Mathf.RoundToInt(carSpeed) < maxSpeed)
+        {
+            float force = accelerationMultiplier * 50f;
+            ApplyMotorTorque(force);
+        }
+        else
+        {
+            ApplyMotorTorque(0);
+        }
+    }
+
+    public void GoReverse()
+    {
+        if (Mathf.Abs(Mathf.RoundToInt(carSpeed)) < maxReverseSpeed)
+        {
+            float force = -accelerationMultiplier * 50f;
+            ApplyMotorTorque(force);
+        }
+        else
+        {
+            ApplyMotorTorque(0);
+        }
+    }
+
+    public void Brakes()
+    {
+        ApplyBrakeTorque(brakeForce);
+    }
+
+    private void ApplyMotorTorque(float torque)
+    {
+        frontLeftCollider.motorTorque = torque;
+        frontRightCollider.motorTorque = torque;
+        rearLeftCollider.motorTorque = torque;
+        rearRightCollider.motorTorque = torque;
+
+        ApplyBrakeTorque(0);
+    }
+
+    private void ApplyBrakeTorque(float brake)
+    {
+        frontLeftCollider.brakeTorque = brake;
+        frontRightCollider.brakeTorque = brake;
+        rearLeftCollider.brakeTorque = brake;
+        rearRightCollider.brakeTorque = brake;
+    }
+
+    private void DecelerateCar()
+    {
+        throttleAxis = Mathf.MoveTowards(throttleAxis, 0f, Time.deltaTime * 5f);
+        carRigidbody.linearVelocity *= 1f / (1f + (0.025f * decelerationMultiplier));
+
+        ApplyMotorTorque(0);
+
+        if (carRigidbody.linearVelocity.magnitude < 0.25f)
+        {
+            carRigidbody.linearVelocity = Vector3.zero;
+            CancelInvoke(nameof(DecelerateCar));
+        }
+    }
+
+    private void SetupFrictionValues()
+    {
+        FLFriction = frontLeftCollider.sidewaysFriction;
+        FLSlip = FLFriction.extremumSlip;
+
+        FRFriction = frontRightCollider.sidewaysFriction;
+        FRSlip = FRFriction.extremumSlip;
+
+        RLFriction = rearLeftCollider.sidewaysFriction;
+        RLSlip = RLFriction.extremumSlip;
+
+        RRFriction = rearRightCollider.sidewaysFriction;
+        RRSlip = RRFriction.extremumSlip;
+    }
+
+    public void Handbrake()
+    {
+        isTractionLocked = true;
+        ApplyFriction(handbrakeDriftMultiplier);
+    }
+
+    public void RecoverTraction()
+    {
+        isTractionLocked = false;
+        ApplyFriction(1f);
+    }
+
+    private void ApplyFriction(float multiplier)
+    {
+        FLFriction.extremumSlip = FLSlip * multiplier;
+        frontLeftCollider.sidewaysFriction = FLFriction;
+
+        FRFriction.extremumSlip = FRSlip * multiplier;
+        frontRightCollider.sidewaysFriction = FRFriction;
+
+        RLFriction.extremumSlip = RLSlip * multiplier;
+        rearLeftCollider.sidewaysFriction = RLFriction;
+
+        RRFriction.extremumSlip = RRSlip * multiplier;
+        rearRightCollider.sidewaysFriction = RRFriction;
     }
 
     private void CarSounds()
@@ -159,16 +259,26 @@ public class PrometeoCarController : MonoBehaviour
         }
     }
 
-    private void SetupFrictionValues() { /* ... */ }
-    private void StopAllEffects() { /* ... */ }
-    private void GoForward() { /* ... */ }
-    private void GoReverse() { /* ... */ }
-    private void DecelerateCar() { /* ... */ }
-    private void Brakes() { /* ... */ }
-    private void Handbrake() { /* ... */ }
-    private void RecoverTraction() { /* ... */ }
-    private void AnimateWheelMeshes() { /* ... */ }
-    private void DriftCarPS() { /* ... */ }
-}
+    private void AnimateWheelMeshes()
+    {
+        frontLeftCollider.GetWorldPose(out var pos1, out var rot1);
+        frontLeftMesh.transform.SetPositionAndRotation(pos1, rot1);
 
-// Input is still handled externally through CarControllerWrapper
+        frontRightCollider.GetWorldPose(out var pos2, out var rot2);
+        frontRightMesh.transform.SetPositionAndRotation(pos2, rot2);
+
+        rearLeftCollider.GetWorldPose(out var pos3, out var rot3);
+        rearLeftMesh.transform.SetPositionAndRotation(pos3, rot3);
+
+        rearRightCollider.GetWorldPose(out var pos4, out var rot4);
+        rearRightMesh.transform.SetPositionAndRotation(pos4, rot4);
+    }
+
+    private void StopAllEffects()
+    {
+        RLWParticleSystem?.Stop();
+        RRWParticleSystem?.Stop();
+        if (RLWTireSkid != null) RLWTireSkid.emitting = false;
+        if (RRWTireSkid != null) RRWTireSkid.emitting = false;
+    }
+}
