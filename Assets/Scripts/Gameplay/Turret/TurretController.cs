@@ -4,9 +4,9 @@ using Unity.Netcode;
 public class TurretController : NetworkBehaviour
 {
     [Header("Turret Transforms")]
-    [SerializeField] private Transform cannonBase;      // rotates Y (left/right)
-    [SerializeField] private Transform cannonHead;      // rotates X (up/down)
-    [SerializeField] private Transform shootPoint;      // where the bullet spawns
+    [SerializeField] private Transform cannonBase;      
+    [SerializeField] private Transform cannonHead;      
+    [SerializeField] private Transform shootPoint;      
 
     [Header("Rotation Settings")]
     [SerializeField] private float rotationSpeed = 60f;
@@ -18,10 +18,12 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private float fireForce = 500f;
 
     private bool isShooter;
+    [SerializeField] private Shooter shooter;
 
     public void AssignShooter(bool shooterAuthority)
     {
         isShooter = shooterAuthority;
+        shooter.SetShooterAuthority(shooterAuthority);
     }
 
     private void Update()
