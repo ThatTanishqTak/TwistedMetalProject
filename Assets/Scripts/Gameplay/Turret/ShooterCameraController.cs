@@ -2,17 +2,19 @@ using UnityEngine;
 
 public class ShooterCameraController : MonoBehaviour
 {
-    [Header("Turret Rotation Targets")]
-    [SerializeField] private Transform cannonBase; 
-    [SerializeField] private Transform cannonHead; 
+    [Header("References")]
+    [SerializeField] private Transform cannonBase;
+    [SerializeField] private Transform cannonHead;       
+    [SerializeField] private Transform cameraPivot;      
 
     [Header("Rotation Settings")]
     [SerializeField] private float sensitivity = 2f;
+    [SerializeField] private float rotationSmoothSpeed = 5f;
     [SerializeField] private float minVerticalAngle = -10f;
     [SerializeField] private float maxVerticalAngle = 45f;
 
-    private float xRotation = 0f;
-    private float yRotation = 0f;
+    private float yaw;  
+    private float pitch; 
 
     private void Start()
     {
@@ -24,11 +26,29 @@ public class ShooterCameraController : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * sensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
-        yRotation += mouseX;
-        cannonBase.localRotation = Quaternion.Euler(0f, yRotation, 0f);
+        yaw += mouseX;
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, minVerticalAngle, maxVerticalAngle);
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, minVerticalAngle, maxVerticalAngle);
-        cannonHead.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        RotateTurret();
+        UpdateCamera();
+    }
+
+    private void RotateTurret()
+    {
+        Quaternion baseTargetRotation = Quaternion.Euler(0f, yaw, 0f);
+        cannonBase.localRotation = Quaternion.Slerp(cannonBase.localRotation, baseTargetRotation, rotationSmoothSpeed * Time.deltaTime);
+
+        Quaternion headTargetRotation = Quaternion.Euler(pitch, 0f, 0f);
+        cannonHead.localRotation = Quaternion.Slerp(cannonHead.localRotation, headTargetRotation, rotationSmoothSpeed * Time.deltaTime);
+    }
+
+    private void UpdateCamera()
+    {
+        if (cameraPivot != null)
+        {
+            cameraPivot.position = cannonHead.position;
+            cameraPivot.rotation = cannonHead.rotation;
+        }
     }
 }
