@@ -4,6 +4,8 @@ public class Shooter : MonoBehaviour
 {
     [SerializeField] private Gun gun;
     [SerializeField] private bool isShooterControlled;
+    public bool IsShooterControlled => isShooterControlled;
+
 
     private void Update()
     {

@@ -6,6 +6,8 @@ public class CarControllerWrapper : NetworkBehaviour
 {
     private ICarMovement carMovement;
     private ulong drivingClientId;
+    public bool IsDriving => NetworkManager.Singleton.LocalClientId == drivingClientId;
+
 
     public void AssignDriver(ulong clientId) {
         drivingClientId = clientId;

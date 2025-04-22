@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Core\Interfaces\ICarMovement.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\CameraFollow.cs" />
+    <Compile Include="Assets\Scripts\Manager\VehicleCameraManager.cs" />
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Turret\ShooterCameraController.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerVisual.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\LobbyUI.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Shooting\GunStats.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Car\DriverCameraController.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoTouchInput.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Turret\TurretController.cs" />
     <Compile Include="Assets\Scripts\Manager\CharacterSelect.cs" />

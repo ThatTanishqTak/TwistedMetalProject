@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rifle
   m_EditorClassIdentifier: 
   weaponName: Rifle
-  projectilePrefab: {fileID: 1417354961124940904, guid: 62b7e8b89bf48414e95de6d455a85149, type: 3}
+  projectilePrefab: {fileID: 3062601953811789319, guid: 51377b176c4c5be47a60d7bf995717ef, type: 3}
   fireRate: 0.1
   fireForce: 15
   ammo: -1

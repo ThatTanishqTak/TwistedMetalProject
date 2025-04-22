@@ -398,6 +398,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Minivan
       objectReference: {fileID: 0}
+    - target: {fileID: 5965209700560220994, guid: c98f7aa5a4b596d4aa2cbec16569d93f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -628,6 +632,12 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4000012307128758, guid: d9231829d3cedca409477c9327eb6425, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2032062468}
+    - targetCorrespondingSourceObject: {fileID: 4000012307128758, guid: d9231829d3cedca409477c9327eb6425, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1102450233}
     - targetCorrespondingSourceObject: {fileID: 4000012415272414, guid: d9231829d3cedca409477c9327eb6425, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1757085830}
@@ -726,6 +736,37 @@ TrailRenderer:
   m_CorrespondingSourceObject: {fileID: 1982165898659999020, guid: 254238627f2052645827a68fed1f0a86, type: 3}
   m_PrefabInstance: {fileID: 5198261345699219502}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1102450232
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1102450233}
+  m_Layer: 0
+  m_Name: Camera pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1102450233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102450232}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.16, z: -2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 35795977}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1340362397
 GameObject:
   m_ObjectHideFlags: 0
@@ -1198,7 +1239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shootPoint: {fileID: 1757085830}
-  bulletPrefab: {fileID: 1417354961124940904, guid: 62b7e8b89bf48414e95de6d455a85149, type: 3}
+  bulletPrefab: {fileID: 3062601953811789319, guid: 51377b176c4c5be47a60d7bf995717ef, type: 3}
   gunStats: {fileID: 11400000, guid: ea4ace5d6a1b9004ea6a24887fa872f3, type: 2}
 --- !u!1 &1659841163
 GameObject:
@@ -1894,12 +1935,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2032062465}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.14445932, y: -0, z: -0, w: 0.9895108}
-  m_LocalPosition: {x: -18.26, y: 2.68, z: -15.64}
+  m_LocalRotation: {x: 0.18262991, y: -0, z: -0, w: 0.9831817}
+  m_LocalPosition: {x: 0.100214, y: 1.1731365, z: -4.6270165}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 35795977}
   m_LocalEulerAnglesHint: {x: 16.612, y: 0, z: 0}
 --- !u!114 &2032062469
 MonoBehaviour:
@@ -1954,12 +1995,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 2032062465}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f6d3ff905719c845a4a6404bc4d4162, type: 3}
+  m_Script: {fileID: 11500000, guid: 0478f9aff20d3634fa24ec419f577f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carTransform: {fileID: 261786959237026373}
-  followSpeed: 2
-  lookSpeed: 10
+  cannonBase: {fileID: 861099896}
+  cannonHead: {fileID: 35795977}
+  cameraPivot: {fileID: 1102450233}
+  sensitivity: 2
+  rotationSmoothSpeed: 5
+  minVerticalAngle: -10
+  maxVerticalAngle: 45
 --- !u!1 &2068572067
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,7 +2271,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 2068572069}
-  - {fileID: 2032062468}
   - {fileID: 1340362399}
   - {fileID: 1659841167}
   - {fileID: 1418026997}
