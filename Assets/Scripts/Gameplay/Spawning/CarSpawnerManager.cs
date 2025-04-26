@@ -8,10 +8,7 @@ public class CarSpawnerManager : NetworkBehaviour
     [SerializeField] private GameObject team1CarPrefab;
     [SerializeField] private GameObject team2CarPrefab;
 
-    private GameObject team1CarInstance;
-    private GameObject team2CarInstance;
-
-    private float spawnDistanceFromCenter = 15f; // tweak based on the size of the map
+    private float spawnDistanceFromCenter = 15f; // tweak based on map size
 
     public override void OnNetworkSpawn()
     {
@@ -23,28 +20,32 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void SpawnCars()
     {
-        // Get team role info
         var teamAssignments = MultiplayerManager.Instance.GetAllTeamAssignments();
 
         foreach (var assignment in teamAssignments)
         {
-            if (assignment.teamNumber == 1)
-            {
-                team1CarInstance = SpawnCar(team1CarPrefab, GetSpawnPositionForTeam(1));
-                AssignPlayerToCar(team1CarInstance, assignment);
-            }
-            else if (assignment.teamNumber == 2)
-            {
-                team2CarInstance = SpawnCar(team2CarPrefab, GetSpawnPositionForTeam(2));
-                AssignPlayerToCar(team2CarInstance, assignment);
-            }
+            Vector3 spawnPosition = GetSpawnPositionForTeam(assignment.teamNumber);
+
+            GameObject prefab = assignment.teamNumber == 1 ? team1CarPrefab : team2CarPrefab;
+            GameObject carInstance = SpawnCar(prefab, spawnPosition, assignment.clientId);
+
+            AssignPlayerToCar(carInstance, assignment);
         }
     }
 
-    private GameObject SpawnCar(GameObject carPrefab, Vector3 spawnPosition)
+    private GameObject SpawnCar(GameObject carPrefab, Vector3 spawnPosition, ulong ownerClientId)
     {
         GameObject carInstance = Instantiate(carPrefab, spawnPosition, Quaternion.identity);
-        carInstance.GetComponent<NetworkObject>().Spawn();
+
+        if (carInstance.TryGetComponent(out NetworkObject netObj))
+        {
+            netObj.SpawnWithOwnership(ownerClientId);
+        }
+        else
+        {
+            Debug.LogError($"[CarSpawnerManager] Car prefab {carPrefab.name} missing NetworkObject!");
+        }
+
         return carInstance;
     }
 
@@ -69,13 +70,12 @@ public class CarSpawnerManager : NetworkBehaviour
 
         if (roleData.role == RoleType.Driver)
         {
-            wrapper.AssignDriver(roleData.clientId);
+            wrapper?.AssignDriver(roleData.clientId);
         }
         else if (roleData.role == RoleType.Shooter)
         {
-            turret.AssignShooter(true);
-            shooter.SetShooterAuthority(true);
-            shooter.SetShooterClientId(roleData.clientId);
+            shooter?.SetShooterAuthority(true);
+            shooter?.SetShooterClientId(roleData.clientId);
         }
     }
 }

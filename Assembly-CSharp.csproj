@@ -86,7 +86,6 @@
     <Compile Include="Assets\Scripts\Gameplay\Shooting\Gun.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterSelectUI.cs" />
     <Compile Include="Assets\Scripts\Core\Interfaces\CarAdapter.cs" />
-    <Compile Include="Assets\Scripts\Temporary Scripts\ManualTestSetup.cs" />
     <Compile Include="Assets\Scripts\Manager\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\NetworkUI.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoCarController.cs" />

@@ -189,7 +189,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 96349519}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &96349522
 Camera:
   m_ObjectHideFlags: 0
@@ -312,10 +312,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  team1CarPrefab: {fileID: 0}
-  team2CarPrefab: {fileID: 0}
-  team1SpawnPoint: {fileID: 0}
-  team2SpawnPoint: {fileID: 0}
+  team1CarPrefab: {fileID: 4063587940901195219, guid: 254238627f2052645827a68fed1f0a86, type: 3}
+  team2CarPrefab: {fileID: 7307728853442162120, guid: 1149229953138f443aa1eebd6c617e06, type: 3}
 --- !u!4 &307082256
 Transform:
   m_ObjectHideFlags: 0
