@@ -8,6 +8,7 @@ public struct TeamRoleData : IEquatable<TeamRoleData>, INetworkSerializable
     public TeamType team;
     public RoleType role;
     public int teamNumber;
+    public ulong clientId; // This is the client ID of the player assigned to this role
 
     public bool Equals(TeamRoleData other)
     {
@@ -19,6 +20,7 @@ public struct TeamRoleData : IEquatable<TeamRoleData>, INetworkSerializable
         serializer.SerializeValue(ref team);
         serializer.SerializeValue(ref role);
         serializer.SerializeValue(ref teamNumber);
+        serializer.SerializeValue(ref clientId); //serialize the clientId
     }
 }
 

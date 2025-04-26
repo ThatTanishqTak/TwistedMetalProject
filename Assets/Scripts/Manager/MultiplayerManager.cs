@@ -230,4 +230,17 @@ public class MultiplayerManager : NetworkBehaviour
     {
         return playerDataNetworkList[playerIndex];
     }
+    public List<TeamRoleData> GetAllTeamAssignments()
+    {
+        List<TeamRoleData> copy = new List<TeamRoleData>();
+
+        foreach (var assignment in teamRoleAssignments)
+        {
+            copy.Add(assignment);
+        }
+
+        return copy;
+    }
+
+
 }
