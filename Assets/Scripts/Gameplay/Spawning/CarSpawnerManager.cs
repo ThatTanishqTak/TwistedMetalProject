@@ -8,12 +8,10 @@ public class CarSpawnerManager : NetworkBehaviour
     [SerializeField] private GameObject team1CarPrefab;
     [SerializeField] private GameObject team2CarPrefab;
 
-    [Header("Spawn Positions")]
-    [SerializeField] private Transform team1SpawnPoint;
-    [SerializeField] private Transform team2SpawnPoint;
-
     private GameObject team1CarInstance;
     private GameObject team2CarInstance;
+
+    private float spawnDistanceFromCenter = 15f; // tweak based on the size of the map
 
     public override void OnNetworkSpawn()
     {
@@ -25,34 +23,42 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void SpawnCars()
     {
-        // Spawn Team 1 Car
-        team1CarInstance = Instantiate(team1CarPrefab, team1SpawnPoint.position, team1SpawnPoint.rotation);
-        team1CarInstance.GetComponent<NetworkObject>().Spawn();
-
-        // Spawn Team 2 Car
-        team2CarInstance = Instantiate(team2CarPrefab, team2SpawnPoint.position, team2SpawnPoint.rotation);
-        team2CarInstance.GetComponent<NetworkObject>().Spawn();
-
-        // Assign driver/shooter roles
-        AssignRoles();
-    }
-
-    private void AssignRoles()
-    {
-        // Get team-role info from MultiplayerManager
+        // Get team role info
         var teamAssignments = MultiplayerManager.Instance.GetAllTeamAssignments();
 
         foreach (var assignment in teamAssignments)
         {
             if (assignment.teamNumber == 1)
             {
+                team1CarInstance = SpawnCar(team1CarPrefab, GetSpawnPositionForTeam(1));
                 AssignPlayerToCar(team1CarInstance, assignment);
             }
             else if (assignment.teamNumber == 2)
             {
+                team2CarInstance = SpawnCar(team2CarPrefab, GetSpawnPositionForTeam(2));
                 AssignPlayerToCar(team2CarInstance, assignment);
             }
         }
+    }
+
+    private GameObject SpawnCar(GameObject carPrefab, Vector3 spawnPosition)
+    {
+        GameObject carInstance = Instantiate(carPrefab, spawnPosition, Quaternion.identity);
+        carInstance.GetComponent<NetworkObject>().Spawn();
+        return carInstance;
+    }
+
+    private Vector3 GetSpawnPositionForTeam(int teamNumber)
+    {
+        Vector3 center = Vector3.zero;
+        float offset = spawnDistanceFromCenter;
+
+        if (teamNumber == 1)
+            return center + new Vector3(-offset, 0, 0);
+        else if (teamNumber == 2)
+            return center + new Vector3(offset, 0, 0);
+        else
+            return center;
     }
 
     private void AssignPlayerToCar(GameObject carInstance, TeamRoleData roleData)
@@ -72,5 +78,4 @@ public class CarSpawnerManager : NetworkBehaviour
             shooter.SetShooterClientId(roleData.clientId);
         }
     }
-
 }
