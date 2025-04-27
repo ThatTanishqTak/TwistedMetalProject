@@ -4,27 +4,11 @@ using Unity.Netcode;
 public class Shooter : NetworkBehaviour
 {
     [SerializeField] private Gun gun;
-    [SerializeField] private bool isShooterControlled;
-
-    public bool IsShooterControlled => isShooterControlled;
-
     private ulong shooterClientId;
+    private bool isShooterControlled;
 
-    private void Update()
-    {
-        if (!IsOwner || NetworkManager.Singleton.LocalClientId != shooterClientId)
-        {
-            return;
-        }
-
-        if (!isShooterControlled) return;
-
-        if (Input.GetMouseButton(0))
-        {
-            Debug.Log("Mouse Clicked");
-            gun.Fire();
-        }
-    }
+    public ulong ShooterClientId => shooterClientId;
+    public bool IsShooterControlled => isShooterControlled;
 
     public void SetShooterAuthority(bool value)
     {
@@ -34,5 +18,16 @@ public class Shooter : NetworkBehaviour
     public void SetShooterClientId(ulong clientId)
     {
         shooterClientId = clientId;
+    }
+
+    private void Update()
+    {
+        if (!IsOwner || NetworkManager.Singleton.LocalClientId != shooterClientId) return;
+        if (!isShooterControlled) return;
+
+        if (Input.GetMouseButton(0))
+        {
+            gun.Fire();
+        }
     }
 }

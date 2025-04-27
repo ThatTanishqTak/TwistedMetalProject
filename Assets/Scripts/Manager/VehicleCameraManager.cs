@@ -1,32 +1,26 @@
 using UnityEngine;
-using Unity.Netcode;
 
-public class VehicleCameraManager : NetworkBehaviour
+public class VehicleCameraManager : MonoBehaviour
 {
-    [SerializeField] private Camera shooterCamera;
-    [SerializeField] private Camera driverCamera;
-
     [SerializeField] private Shooter shooter;
     [SerializeField] private CarControllerWrapper driver;
+    [SerializeField] private GameObject shooterCamera;
+    [SerializeField] private GameObject driverCamera;
 
     private void Start()
     {
-        if (!IsOwner)
-        {
-            shooterCamera.gameObject.SetActive(false);
-            driverCamera.gameObject.SetActive(false);
-            return;
-        }
+        shooterCamera.SetActive(false);
+        driverCamera.SetActive(false);
 
-        if (shooter != null && shooter.IsShooterControlled)
+        if (shooter != null && shooter.IsShooterControlled && shooter.IsOwner)
         {
-            shooterCamera.gameObject.SetActive(true);
-            driverCamera.gameObject.SetActive(false);
+            shooterCamera.SetActive(true);
+            driverCamera.SetActive(false);
         }
-        else if (driver != null && driver.IsDriving)
+        else if (driver != null && driver.IsOwner)
         {
-            shooterCamera.gameObject.SetActive(false);
-            driverCamera.gameObject.SetActive(true);
+            driverCamera.SetActive(true);
+            shooterCamera.SetActive(false);
         }
     }
 }

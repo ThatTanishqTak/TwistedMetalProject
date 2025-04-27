@@ -1,13 +1,11 @@
-using UnityEngine;
-using System.Collections.Generic;
+﻿using UnityEngine;
 using Unity.Netcode;
 
 public class CarControllerWrapper : NetworkBehaviour
 {
     private ICarMovement carMovement;
     private ulong drivingClientId;
-
-    public bool IsDriving => NetworkManager.Singleton.LocalClientId == drivingClientId;
+    public ulong DrivingClientId => drivingClientId;
 
     public void AssignDriver(ulong clientId)
     {
@@ -21,10 +19,7 @@ public class CarControllerWrapper : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsOwner || NetworkManager.Singleton.LocalClientId != drivingClientId)
-        {
-            return;
-        }
+        if (!IsOwner || NetworkManager.Singleton.LocalClientId != drivingClientId) return;
 
         float throttle = Input.GetAxis("Vertical");
         float steering = Input.GetAxis("Horizontal");
