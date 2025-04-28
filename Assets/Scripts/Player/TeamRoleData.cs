@@ -22,5 +22,5 @@ public struct TeamRoleData : IEquatable<TeamRoleData>, INetworkSerializable
     }
 }
 
-public enum TeamType { None = 0, TeamA, TeamB, TeamC, TeamD, TeamE }
+public enum TeamType { None = 0, TeamA, TeamB, TeamC, TeamD }
 public enum RoleType { None = 0, Driver, Shooter }

@@ -14,7 +14,7 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private float maxVerticalAngle = 45f;
 
     [Header("Projectile Settings")]
-    [SerializeField] private GameObject projectilePrefab;
+    //[SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float fireForce = 500f;
 
     [SerializeField] private Shooter shooter;  // Shooter script reference
@@ -50,13 +50,15 @@ public class TurretController : NetworkBehaviour
     [ServerRpc]
     private void FireServerRpc(ServerRpcParams rpcParams = default)
     {
-        GameObject bullet = Instantiate(projectilePrefab, shootPoint.position, shootPoint.rotation);
-        var rb = bullet.GetComponent<Rigidbody>();
-        if (rb != null)
+        RaycastHit hit;
+        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out hit))
         {
-            rb.linearVelocity = shootPoint.forward * fireForce;
+            Debug.Log("Hit: " + hit.transform.gameObject.name);
         }
-        bullet.GetComponent<NetworkObject>().Spawn();
+        else
+        {
+            Debug.Log("Missed");
+        }
     }
 
     private float ClampAngle(float angle, float min, float max)

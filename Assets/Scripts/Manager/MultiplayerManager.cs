@@ -72,13 +72,9 @@ public class MultiplayerManager : NetworkBehaviour
             {
                 team = TeamType.TeamC;
             }
-            else if (teamNumber == 3)
-            {
-                team = TeamType.TeamD;
-            }
             else
             {
-                team = TeamType.TeamE;
+                team = TeamType.TeamD;
             }
 
             for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
