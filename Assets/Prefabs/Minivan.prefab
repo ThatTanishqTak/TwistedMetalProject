@@ -1060,8 +1060,6 @@ MonoBehaviour:
   rotationSpeed: 60
   minVerticalAngle: -10
   maxVerticalAngle: 45
-  projectilePrefab: {fileID: 1417354961124940904, guid: 62b7e8b89bf48414e95de6d455a85149, type: 3}
-  fireForce: 500
   shooter: {fileID: 701597784823182075}
 --- !u!114 &701597784823182075
 MonoBehaviour:
@@ -1178,7 +1176,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shootPoint: {fileID: 2632050365166589147}
-  bulletPrefab: {fileID: 1417354961124940904, guid: 62b7e8b89bf48414e95de6d455a85149, type: 3}
   gunStats: {fileID: 11400000, guid: ea4ace5d6a1b9004ea6a24887fa872f3, type: 2}
 --- !u!1 &7185965182578716766
 GameObject:
@@ -1284,6 +1281,7 @@ GameObject:
   - component: {fileID: 6751374844293031297}
   - component: {fileID: 275931910228828525}
   - component: {fileID: 1413785194609004027}
+  - component: {fileID: 2977455599785021037}
   m_Layer: 0
   m_Name: Minivan
   m_TagString: Untagged
@@ -1442,10 +1440,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9334e9053fef764698bf62c3ac1c7a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   shooter: {fileID: 701597784823182075}
   driver: {fileID: 6751374844293031297}
   shooterCamera: {fileID: 9123785517100449662}
   driverCamera: {fileID: 6231633041415782090}
+--- !u!114 &2977455599785021037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7307728853442162120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkTransformExpanded: 0
+  AuthorityMode: 0
+  TickSyncChildren: 0
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  SwitchTransformSpaceWhenParented: 0
+  Interpolate: 1
+  SlerpPosition: 0
 --- !u!1 &7467730891334393321
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,23 +14,24 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private float maxVerticalAngle = 45f;
 
     [Header("Projectile Settings")]
-    //[SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float fireForce = 500f;
-
-    [SerializeField] private Shooter shooter;  // Shooter script reference
+    [SerializeField] private Shooter shooter;  // Reference to the Shooter component
 
     private void Update()
     {
-        if (!IsOwner) return;   // <--- Super important (only owner controls turret)
+        // 1) Must be flagged as the shooter
+        // 2) Must be *this* client’s ID
+        if (shooter == null
+            || !shooter.IsShooterControlled
+            || NetworkManager.Singleton.LocalClientId != shooter.ShooterClientId)
+            return;
 
-        if (shooter != null && shooter.IsShooterControlled)
+        // Only the assigned shooter on their own client may rotate
+        RotateTurret();
+
+        // And only the assigned shooter may fire
+        if (Input.GetMouseButton(0))
         {
-            RotateTurret();
-
-            if (Input.GetMouseButton(0))  // Hold mouse button to fire
-            {
-                FireServerRpc();
-            }
+            FireServerRpc();
         }
     }
 
@@ -47,18 +48,14 @@ public class TurretController : NetworkBehaviour
         cannonHead.localEulerAngles = headRotation;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void FireServerRpc(ServerRpcParams rpcParams = default)
     {
         RaycastHit hit;
         if (Physics.Raycast(shootPoint.position, shootPoint.forward, out hit))
-        {
             Debug.Log("Hit: " + hit.transform.gameObject.name);
-        }
         else
-        {
             Debug.Log("Missed");
-        }
     }
 
     private float ClampAngle(float angle, float min, float max)

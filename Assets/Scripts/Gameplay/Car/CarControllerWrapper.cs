@@ -4,22 +4,30 @@ using Unity.Netcode;
 public class CarControllerWrapper : NetworkBehaviour
 {
     private ICarMovement carMovement;
-    private ulong drivingClientId;
-    public ulong DrivingClientId => drivingClientId;
 
-    public void AssignDriver(ulong clientId)
-    {
-        drivingClientId = clientId;
-    }
+    // Now a NetworkVariable as well:
+    private NetworkVariable<ulong> drivingClientId = new NetworkVariable<ulong>(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
-    private void Awake()
+    public ulong DrivingClientId => drivingClientId.Value;
+
+    public override void OnNetworkSpawn()
     {
         carMovement = GetComponent<ICarMovement>();
     }
 
+    public void AssignDriver(ulong clientId)
+    {
+        drivingClientId.Value = clientId;
+    }
+
     private void Update()
     {
-        if (!IsOwner || NetworkManager.Singleton.LocalClientId != drivingClientId) return;
+        if (NetworkManager.Singleton.LocalClientId != DrivingClientId)
+            return;
 
         float throttle = Input.GetAxis("Vertical");
         float steering = Input.GetAxis("Horizontal");
