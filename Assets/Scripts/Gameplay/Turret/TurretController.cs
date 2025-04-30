@@ -1,66 +1,69 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Unity.Netcode;
 
 public class TurretController : NetworkBehaviour
 {
-    [Header("Turret Transforms")]
+    [Header("Turret Parts")]
     [SerializeField] private Transform cannonBase;
     [SerializeField] private Transform cannonHead;
     [SerializeField] private Transform shootPoint;
 
     [Header("Rotation Settings")]
     [SerializeField] private float rotationSpeed = 60f;
-    [SerializeField] private float minVerticalAngle = -10f;
-    [SerializeField] private float maxVerticalAngle = 45f;
+    [SerializeField] private float minPitch = -10f;
+    [SerializeField] private float maxPitch = 45f;
 
-    [Header("Projectile Settings")]
-    [SerializeField] private Shooter shooter;  // Reference to the Shooter component
+    [Header("Shooter Reference")]
+    [SerializeField] private Shooter shooter;
+
+    // Owner-written yaw on the base (around Y)
+    private NetworkVariable<Quaternion> baseRotation = new NetworkVariable<Quaternion>(
+        Quaternion.identity,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
+
+    // Owner-written pitch on the head (around X)
+    private NetworkVariable<float> headPitch = new NetworkVariable<float>(
+        0f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner
+    );
 
     private void Update()
     {
-        // 1) Must be flagged as the shooter
-        // 2) Must be *this* client’s ID
-        if (shooter == null
-            || !shooter.IsShooterControlled
-            || NetworkManager.Singleton.LocalClientId != shooter.ShooterClientId)
+        if (!shooter.IsShooterControlled ||
+            NetworkManager.Singleton.LocalClientId != shooter.ShooterClientId)
             return;
 
-        // Only the assigned shooter on their own client may rotate
-        RotateTurret();
+        float mx = Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
+        float my = Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
 
-        // And only the assigned shooter may fire
+        var current = baseRotation.Value.eulerAngles;
+        float yaw = current.y + mx;
+
+        float pitch = headPitch.Value - my;
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+        baseRotation.Value = Quaternion.Euler(0f, yaw, 0f);
+        headPitch.Value = pitch;
+
         if (Input.GetMouseButton(0))
-        {
             FireServerRpc();
-        }
     }
 
-    private void RotateTurret()
+    private void LateUpdate()
     {
-        float mouseX = Input.GetAxis("Mouse X");
-        float mouseY = Input.GetAxis("Mouse Y");
-
-        cannonBase.Rotate(Vector3.up * mouseX * rotationSpeed * Time.deltaTime);
-
-        Vector3 headRotation = cannonHead.localEulerAngles;
-        headRotation.x -= mouseY * rotationSpeed * Time.deltaTime;
-        headRotation.x = ClampAngle(headRotation.x, minVerticalAngle, maxVerticalAngle);
-        cannonHead.localEulerAngles = headRotation;
+        cannonBase.localRotation = baseRotation.Value;
+        cannonHead.localEulerAngles = new Vector3(headPitch.Value, 0f, 0f);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void FireServerRpc(ServerRpcParams rpcParams = default)
+    private void FireServerRpc()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out hit))
-            Debug.Log("Hit: " + hit.transform.gameObject.name);
+        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out var hit))
+            Debug.Log("Hit: " + hit.transform.name);
         else
             Debug.Log("Missed");
-    }
-
-    private float ClampAngle(float angle, float min, float max)
-    {
-        if (angle > 180f) angle -= 360f;
-        return Mathf.Clamp(angle, min, max);
     }
 }

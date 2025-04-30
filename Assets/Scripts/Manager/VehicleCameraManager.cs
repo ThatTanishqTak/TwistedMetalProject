@@ -1,37 +1,63 @@
+﻿using System;
 using UnityEngine;
 using Unity.Netcode;
 
-public class VehicleCameraManager : NetworkBehaviour
+public class VehicleCameraManager : MonoBehaviour
 {
+    [Header("Role Components")]
     [SerializeField] private Shooter shooter;
     [SerializeField] private CarControllerWrapper driver;
-    [SerializeField] private GameObject shooterCamera;
-    [SerializeField] private GameObject driverCamera;
+
+    [Header("Cameras")]
+    [SerializeField] private Camera lobbyCamera;
+    [SerializeField] private Camera driverCamera;
+    [SerializeField] private Camera shooterCamera;
 
     private void Awake()
     {
-        //mainCamera.gameObject.SetActive(false);
+        // only lobby cam starts active
+        if (driverCamera != null) driverCamera.gameObject.SetActive(false);
+        if (shooterCamera != null) shooterCamera.gameObject.SetActive(false);
     }
 
     private void Start()
     {
-        if (!IsOwner)
+        // in case teams were already formed before we subscribed
+        if (MultiplayerManager.Instance.GetAllTeamAssignments().Count > 0)
+            HandleTeamsFormed(this, EventArgs.Empty);
+    }
+
+    private void OnEnable()
+    {
+        MultiplayerManager.Instance.OnTeamsFormed += HandleTeamsFormed;
+    }
+
+    private void OnDisable()
+    {
+        MultiplayerManager.Instance.OnTeamsFormed -= HandleTeamsFormed;
+    }
+
+    private void HandleTeamsFormed(object sender, EventArgs args)
+    {
+        if (!NetworkManager.Singleton.IsClient) return;
+
+        if (lobbyCamera != null)
+            lobbyCamera.gameObject.SetActive(false);
+
+        if (shooter != null
+            && shooter.IsShooterControlled
+            && shooter.ShooterClientId == NetworkManager.Singleton.LocalClientId)
         {
-            return; 
+            shooterCamera.gameObject.SetActive(true);
+            return;
         }
 
-        shooterCamera.SetActive(false);
-        driverCamera.SetActive(false);
+        if (driver != null
+            && driver.DrivingClientId == NetworkManager.Singleton.LocalClientId)
+        {
+            driverCamera.gameObject.SetActive(true);
+            return;
+        }
 
-        if (shooter != null && shooter.IsShooterControlled && shooter.IsOwner)
-        {
-            shooterCamera.SetActive(true);
-            driverCamera.SetActive(false);
-        }
-        else if (driver != null && driver.IsOwner)
-        {
-            driverCamera.SetActive(true);
-            shooterCamera.SetActive(false);
-        }
     }
 }
