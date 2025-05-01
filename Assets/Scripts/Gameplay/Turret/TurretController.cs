@@ -16,48 +16,61 @@ public class TurretController : NetworkBehaviour
     [Header("Shooter Reference")]
     [SerializeField] private Shooter shooter;
 
-    // Owner-written yaw on the base (around Y)
+    // Server‐only writes, everyone reads
     private NetworkVariable<Quaternion> baseRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
-    // Owner-written pitch on the head (around X)
     private NetworkVariable<float> headPitch = new NetworkVariable<float>(
         0f,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
     private void Update()
     {
+        // only the *assigned* shooter client drives rotation/shooting
         if (!shooter.IsShooterControlled ||
             NetworkManager.Singleton.LocalClientId != shooter.ShooterClientId)
             return;
 
+        // gather mouse deltas
         float mx = Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
         float my = Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
 
-        var current = baseRotation.Value.eulerAngles;
-        float yaw = current.y + mx;
+        // send them to the server to update the NetworkVariables
+        UpdateRotationServerRpc(mx, my);
 
-        float pitch = headPitch.Value - my;
-        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-
-        baseRotation.Value = Quaternion.Euler(0f, yaw, 0f);
-        headPitch.Value = pitch;
-
+        // fire if holding down
         if (Input.GetMouseButton(0))
             FireServerRpc();
     }
 
     private void LateUpdate()
     {
+        // everyone applies the latest yaw & pitch
         cannonBase.localRotation = baseRotation.Value;
         cannonHead.localEulerAngles = new Vector3(headPitch.Value, 0f, 0f);
     }
 
+    // Runs on the server—updates our yaw & pitch NVs from client‐sent deltas
+    [ServerRpc(RequireOwnership = false)]
+    private void UpdateRotationServerRpc(float yawDelta, float pitchDelta)
+    {
+        // apply yaw
+        float newYaw = (baseRotation.Value.eulerAngles.y + yawDelta) % 360f;
+
+        // apply and clamp pitch
+        float newPitch = headPitch.Value - pitchDelta;
+        newPitch = Mathf.Clamp(newPitch, minPitch, maxPitch);
+
+        baseRotation.Value = Quaternion.Euler(0f, newYaw, 0f);
+        headPitch.Value = newPitch;
+    }
+
+    // Your existing shooting RPC (no changes needed here)
     [ServerRpc(RequireOwnership = false)]
     private void FireServerRpc()
     {

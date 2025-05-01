@@ -15,14 +15,12 @@ public class VehicleCameraManager : MonoBehaviour
 
     private void Awake()
     {
-        // only lobby cam starts active
         if (driverCamera != null) driverCamera.gameObject.SetActive(false);
         if (shooterCamera != null) shooterCamera.gameObject.SetActive(false);
     }
 
     private void Start()
     {
-        // in case teams were already formed before we subscribed
         if (MultiplayerManager.Instance.GetAllTeamAssignments().Count > 0)
             HandleTeamsFormed(this, EventArgs.Empty);
     }
