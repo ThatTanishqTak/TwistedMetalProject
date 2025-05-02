@@ -164,8 +164,8 @@ MonoBehaviour:
   cannonHead: {fileID: 451225273995050336}
   shootPoint: {fileID: 2988487418939027137}
   rotationSpeed: 60
-  minVerticalAngle: -10
-  maxVerticalAngle: 45
+  minPitch: -10
+  maxPitch: 45
   shooter: {fileID: 6435065289806950257}
 --- !u!114 &6435065289806950257
 MonoBehaviour:
@@ -11717,8 +11717,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 84120f1226c713443b2f65f24008bc59, type: 2}
-  - {fileID: 2100000, guid: 3bb47e0adb998f549843efeb632e0268, type: 2}
+  - {fileID: 2100000, guid: 3faa6d39766081f439cf1b3333ff1b4f, type: 2}
+  - {fileID: 2100000, guid: 3faa6d39766081f439cf1b3333ff1b4f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
