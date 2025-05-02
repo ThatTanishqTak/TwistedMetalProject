@@ -9,7 +9,8 @@ public static class Loader
     public enum Scene
     {
         Lobby,
-        CharacterSelect
+        CharacterSelect,
+        Arena
     }
 
     private static Scene targetScene;
