@@ -1114,7 +1114,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  startSeconds: 10000
+  startSeconds: 30
   countdownText: {fileID: 2013971737}
 --- !u!4 &915054822
 Transform:
