@@ -1527,9 +1527,21 @@
       <Project>{518AEEB6-E2A5-55B2-CDCD-F4B48CD8FB13}</Project>
       <Name>IngameDebugConsole.Runtime</Name>
     </ProjectReference>
+    <ProjectReference Include="Boxophobic.Utils.Scripts.csproj">
+      <Project>{B4AA6479-398A-89DA-2DF5-BE60950755E0}</Project>
+      <Name>Boxophobic.Utils.Scripts</Name>
+    </ProjectReference>
     <ProjectReference Include="IngameDebugConsole.Editor.csproj">
       <Project>{6B6D413D-6A53-0E1F-5D6D-3DCD862B3E08}</Project>
       <Name>IngameDebugConsole.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Boxophobic.Utils.Editor.csproj">
+      <Project>{2EC6E342-2301-5977-8F7E-2A617F150040}</Project>
+      <Name>Boxophobic.Utils.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Boxophobic.SkyboxCubemapExtended.Editor.csproj">
+      <Project>{07ACD408-DC18-EA68-CE23-B9BEDA942033}</Project>
+      <Name>Boxophobic.SkyboxCubemapExtended.Editor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
@@ -9,90 +10,169 @@ public class CarSpawnerManager : NetworkBehaviour
     [SerializeField] private GameObject team1CarPrefab;
     [SerializeField] private GameObject team2CarPrefab;
 
-    [Header("Spawn Settings")]
-    [SerializeField, Tooltip("Distance from world-center to spawn each team�s car")]
-    private float spawnDistanceFromCenter = 15f;
+    [Header("Layers")]
+    [Tooltip("Only your ground colliders should be on this layer")]
+    [SerializeField] private LayerMask groundLayerMask;
+    [Tooltip("Any obstacles you want to avoid at spawn")]
+    [SerializeField] private LayerMask obstacleLayerMask;
+
+    [Header("Sampling Settings")]
+    [Tooltip("How many random attempts per team before fallback")]
+    [SerializeField] private int maxSpawnAttempts = 10;
+    [Tooltip("Radius to check around a candidate for nearby obstacles")]
+    [SerializeField] private float obstacleCheckRadius = 1f;
+    [Tooltip("Extra height above the map to start each raycast")]
+    [SerializeField] private float rayStartHeight = 50f;
 
     private GameObject team1CarInstance;
     private GameObject team2CarInstance;
+    private Bounds groundBounds;
 
     public override void OnNetworkSpawn()
     {
         if (!IsServer) return;
 
-        // 1) First spawn in the Lobby (or CharacterSelect) scene:
+        ComputeGroundBounds();
         SpawnCars();
 
-        // 2) Then subscribe to the networked scene-load event:
-        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+        // Also respawn whenever you network‐load a new scene
+        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadCompleted;
     }
 
-    private void OnLoadEventCompleted(string sceneName,
-                                     LoadSceneMode loadMode,
-                                     List<ulong> clientsCompleted,
-                                     List<ulong> clientsTimedOut)
+    private void OnLoadCompleted(string sceneName,
+                                 LoadSceneMode loadMode,
+                                 List<ulong> clientsCompleted,
+                                 List<ulong> clientsTimedOut)
     {
         if (!IsServer) return;
 
-        // When we finish loading the Arena, clean up & respawn:
-        if (sceneName == Loader.Scene.Arena.ToString())
+        // e.g. after Lobby → Arena
+        // Destroy old cars:
+        if (team1CarInstance != null) Destroy(team1CarInstance);
+        if (team2CarInstance != null) Destroy(team2CarInstance);
+
+        // Recompute bounds in case your new map has different ground geometry
+        ComputeGroundBounds();
+        SpawnCars();
+    }
+
+    private void ComputeGroundBounds()
+    {
+        // Find every Collider whose GameObject layer is in groundLayerMask
+        var groundCols = FindObjectsOfType<Collider>()
+            .Where(c => ((1 << c.gameObject.layer) & groundLayerMask) != 0)
+            .ToArray();
+
+        if (groundCols.Length == 0)
         {
-            if (team1CarInstance != null) Destroy(team1CarInstance);
-            if (team2CarInstance != null) Destroy(team2CarInstance);
-            SpawnCars();
+            Debug.LogError("CarSpawnerManager: No ground Colliders found on your ground layer!");
+            groundBounds = new Bounds(Vector3.zero, Vector3.one * 100f);
+            return;
         }
+
+        // Merge all their bounds into one big Bounds
+        groundBounds = groundCols[0].bounds;
+        for (int i = 1; i < groundCols.Length; i++)
+            groundBounds.Encapsulate(groundCols[i].bounds);
     }
 
     private void SpawnCars()
     {
-        team1CarInstance = SpawnCar(team1CarPrefab, GetSpawnPositionForTeam(1));
-        team2CarInstance = SpawnCar(team2CarPrefab, GetSpawnPositionForTeam(2));
+        // Sample one spawn point per team
+        Vector3 posA = SampleSpawnPoint(TeamType.TeamA);
+        Vector3 posB = SampleSpawnPoint(TeamType.TeamB);
+
+        team1CarInstance = SpawnCar(team1CarPrefab, posA);
+        team2CarInstance = SpawnCar(team2CarPrefab, posB);
+
         AssignRolesToPlayers();
+    }
+
+    private Vector3 SampleSpawnPoint(TeamType team)
+    {
+        // Divide groundBounds into left/right halves
+        float minX = groundBounds.min.x;
+        float maxX = groundBounds.max.x;
+        float midX = groundBounds.center.x;
+        float minZ = groundBounds.min.z;
+        float maxZ = groundBounds.max.z;
+
+        float regionMinX = team == TeamType.TeamA ? minX : midX;
+        float regionMaxX = team == TeamType.TeamA ? midX : maxX;
+
+        // Try random points first
+        for (int i = 0; i < maxSpawnAttempts; i++)
+        {
+            float x = Random.Range(regionMinX, regionMaxX);
+            float z = Random.Range(minZ, maxZ);
+            Vector3 origin = new Vector3(x, groundBounds.max.y + rayStartHeight, z);
+
+            if (Physics.Raycast(origin, Vector3.down,
+                                out RaycastHit hit,
+                                groundBounds.size.y + 2f * rayStartHeight,
+                                groundLayerMask))
+            {
+                Vector3 candidate = hit.point;
+
+                // Check for nearby obstacles
+                if (!Physics.CheckSphere(candidate + Vector3.up * 0.5f,
+                                         obstacleCheckRadius,
+                                         obstacleLayerMask))
+                {
+                    return candidate;
+                }
+            }
+        }
+
+        // Fallback: center of the region
+        float centerX = (regionMinX + regionMaxX) * 0.5f;
+        float centerZ = (minZ + maxZ) * 0.5f;
+        Vector3 fallbackOrigin = new Vector3(centerX,
+                                             groundBounds.max.y + rayStartHeight,
+                                             centerZ);
+
+        if (Physics.Raycast(fallbackOrigin, Vector3.down,
+                            out RaycastHit fallbackHit,
+                            groundBounds.size.y + 2f * rayStartHeight,
+                            groundLayerMask))
+        {
+            return fallbackHit.point;
+        }
+
+        // Last resort: just drop to y=0
+        return new Vector3(centerX, 0f, centerZ);
     }
 
     private GameObject SpawnCar(GameObject prefab, Vector3 position)
     {
-        var instance = Instantiate(prefab, position, Quaternion.identity);
-        var netObj = instance.GetComponent<NetworkObject>();
-        if (netObj != null) netObj.Spawn();
-        else Debug.LogError("Car prefab is missing a NetworkObject!");
-        return instance;
-    }
-
-    private Vector3 GetSpawnPositionForTeam(int team)
-    {
-        float offset = spawnDistanceFromCenter;
-        return Vector3.zero + (team == 1
-            ? new Vector3(-offset, 0f, 0f)
-            : new Vector3(offset, 0f, 0f));
+        var go = Instantiate(prefab, position, Quaternion.identity);
+        if (go.TryGetComponent<NetworkObject>(out var net))
+            net.Spawn();
+        else
+            Debug.LogError("Car prefab is missing a NetworkObject!");
+        return go;
     }
 
     private void AssignRolesToPlayers()
     {
         var assignments = MultiplayerManager.Instance.GetAllTeamAssignments();
-        foreach (var assignment in assignments)
+        foreach (var a in assignments)
         {
-            GameObject car = assignment.team == TeamType.TeamA
+            GameObject car = a.team == TeamType.TeamA
                 ? team1CarInstance
                 : team2CarInstance;
 
-            if (car == null)
-            {
-                Debug.LogError($"Car not found for team {assignment.team}");
-                continue;
-            }
+            if (car == null) continue;
 
-            var wrapper = car.GetComponent<CarControllerWrapper>();
+            var driver = car.GetComponent<CarControllerWrapper>();
             var shooter = car.GetComponentInChildren<Shooter>();
 
-            if (assignment.role == RoleType.Driver)
-            {
-                wrapper.AssignDriver(assignment.clientId);
-            }
-            else // Shooter
+            if (a.role == RoleType.Driver)
+                driver.AssignDriver(a.clientId);
+            else
             {
                 shooter.SetShooterAuthority(true);
-                shooter.SetShooterClientId(assignment.clientId);
+                shooter.SetShooterClientId(a.clientId);
             }
         }
     }
@@ -100,6 +180,6 @@ public class CarSpawnerManager : NetworkBehaviour
     private new void OnDestroy()
     {
         if (NetworkManager.Singleton != null)
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadCompleted;
     }
 }
