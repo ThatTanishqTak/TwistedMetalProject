@@ -35,7 +35,6 @@ public class CarSpawnerManager : NetworkBehaviour
         ComputeGroundBounds();
         SpawnCars();
 
-        // Also respawn whenever you network‐load a new scene
         NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadCompleted;
     }
 
@@ -46,19 +45,16 @@ public class CarSpawnerManager : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // e.g. after Lobby → Arena
-        // Destroy old cars:
+        
         if (team1CarInstance != null) Destroy(team1CarInstance);
         if (team2CarInstance != null) Destroy(team2CarInstance);
 
-        // Recompute bounds in case your new map has different ground geometry
         ComputeGroundBounds();
         SpawnCars();
     }
 
     private void ComputeGroundBounds()
     {
-        // Find every Collider whose GameObject layer is in groundLayerMask
         var groundCols = FindObjectsOfType<Collider>()
             .Where(c => ((1 << c.gameObject.layer) & groundLayerMask) != 0)
             .ToArray();
@@ -70,7 +66,6 @@ public class CarSpawnerManager : NetworkBehaviour
             return;
         }
 
-        // Merge all their bounds into one big Bounds
         groundBounds = groundCols[0].bounds;
         for (int i = 1; i < groundCols.Length; i++)
             groundBounds.Encapsulate(groundCols[i].bounds);
@@ -78,7 +73,6 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void SpawnCars()
     {
-        // Sample one spawn point per team
         Vector3 posA = SampleSpawnPoint(TeamType.TeamA);
         Vector3 posB = SampleSpawnPoint(TeamType.TeamB);
 
@@ -90,7 +84,6 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private Vector3 SampleSpawnPoint(TeamType team)
     {
-        // Divide groundBounds into left/right halves
         float minX = groundBounds.min.x;
         float maxX = groundBounds.max.x;
         float midX = groundBounds.center.x;
@@ -100,7 +93,6 @@ public class CarSpawnerManager : NetworkBehaviour
         float regionMinX = team == TeamType.TeamA ? minX : midX;
         float regionMaxX = team == TeamType.TeamA ? midX : maxX;
 
-        // Try random points first
         for (int i = 0; i < maxSpawnAttempts; i++)
         {
             float x = Random.Range(regionMinX, regionMaxX);
@@ -114,7 +106,6 @@ public class CarSpawnerManager : NetworkBehaviour
             {
                 Vector3 candidate = hit.point;
 
-                // Check for nearby obstacles
                 if (!Physics.CheckSphere(candidate + Vector3.up * 0.5f,
                                          obstacleCheckRadius,
                                          obstacleLayerMask))
@@ -139,7 +130,6 @@ public class CarSpawnerManager : NetworkBehaviour
             return fallbackHit.point;
         }
 
-        // Last resort: just drop to y=0
         return new Vector3(centerX, 0f, centerZ);
     }
 
