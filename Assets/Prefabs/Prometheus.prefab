@@ -167,6 +167,7 @@ MonoBehaviour:
   minPitch: -10
   maxPitch: 45
   shooter: {fileID: 6435065289806950257}
+  gunStats: {fileID: 11400000, guid: ea4ace5d6a1b9004ea6a24887fa872f3, type: 2}
 --- !u!114 &6435065289806950257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10342,9 +10343,10 @@ GameObject:
   - component: {fileID: 2528660692448743857}
   - component: {fileID: 4685176296316544831}
   - component: {fileID: 3157975120804710006}
+  - component: {fileID: 8369805495648934530}
   m_Layer: 0
   m_Name: Prometheus
-  m_TagString: Untagged
+  m_TagString: Car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10359,7 +10361,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 54.247055, y: 0, z: -34.450874}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5881669589964647079}
@@ -10410,14 +10412,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0fefceefe666bb4682b272ec8c5bdd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 120
+  maxSpeed: 140
   maxReverseSpeed: 45
-  accelerationMultiplier: 6
-  maxSteeringAngle: 35
-  steeringSpeed: 0.5
-  brakeForce: 450
-  decelerationMultiplier: 2
-  handbrakeDriftMultiplier: 5
+  accelerationMultiplier: 8
+  maxSteeringAngle: 40
+  steeringSpeed: 1
+  brakeForce: 300
+  decelerationMultiplier: 3
+  handbrakeDriftMultiplier: 8
   bodyMassCenter: {x: 0, y: 0, z: 0}
   frontLeftMesh: {fileID: 7498250979202790377}
   frontLeftCollider: {fileID: 7863154158843535665}
@@ -10503,7 +10505,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shooter: {fileID: 6435065289806950257}
   driver: {fileID: 5715786203480551380}
-  lobbyCamera: {fileID: 1205504682557406493, guid: 7ab8727ca7f92d044a49c1b54c22ae76, type: 3}
   driverCamera: {fileID: 5936799528615968284}
   shooterCamera: {fileID: 3937920846581740612}
 --- !u!114 &3157975120804710006
@@ -10542,6 +10543,21 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &8369805495648934530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5043321348027522718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7a4d4d7de18d8a47918d5f7051452bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  maxHealth: 100
+  respawnDelay: 5
 --- !u!1 &5243857452194934456
 GameObject:
   m_ObjectHideFlags: 0
