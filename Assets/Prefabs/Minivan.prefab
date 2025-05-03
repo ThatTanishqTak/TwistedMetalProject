@@ -176,7 +176,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shooter: {fileID: 5465524118255197828}
   driver: {fileID: 6176292491816945079}
-  lobbyCamera: {fileID: 1205504682557406493, guid: 7ab8727ca7f92d044a49c1b54c22ae76, type: 3}
   driverCamera: {fileID: 7478281549012309960}
   shooterCamera: {fileID: 7738110476334277624}
 --- !u!114 &8930395948568465080
@@ -619,8 +618,8 @@ MonoBehaviour:
   cannonHead: {fileID: 3953172225014566672}
   shootPoint: {fileID: 5660895478682874261}
   rotationSpeed: 60
-  minVerticalAngle: -10
-  maxVerticalAngle: 45
+  minPitch: -10
+  maxPitch: 45
   shooter: {fileID: 5465524118255197828}
 --- !u!114 &5465524118255197828
 MonoBehaviour:
@@ -1293,7 +1292,7 @@ Transform:
   m_GameObject: {fileID: 4753562262238912766}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.16, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
