@@ -13,16 +13,16 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private float minPitch = -10f;
     [SerializeField] private float maxPitch = 45f;
 
-    [Header("Shooter Reference")]
+    [Header("Shooter & GunStats")]
     [SerializeField] private Shooter shooter;
+    [Tooltip("Read range & damage from here")]
+    [SerializeField] private GunStats gunStats;
 
-    // Server‐only writes, everyone reads
     private NetworkVariable<Quaternion> baseRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
-
     private NetworkVariable<float> headPitch = new NetworkVariable<float>(
         0f,
         NetworkVariableReadPermission.Everyone,
@@ -31,52 +31,56 @@ public class TurretController : NetworkBehaviour
 
     private void Update()
     {
-        // only the *assigned* shooter client drives rotation/shooting
         if (!shooter.IsShooterControlled ||
             NetworkManager.Singleton.LocalClientId != shooter.ShooterClientId)
             return;
 
-        // gather mouse deltas
         float mx = Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
         float my = Input.GetAxis("Mouse Y") * rotationSpeed * Time.deltaTime;
-
-        // send them to the server to update the NetworkVariables
         UpdateRotationServerRpc(mx, my);
 
-        // fire if holding down
         if (Input.GetMouseButton(0))
-            FireServerRpc();
+            FireServerRpc(new ServerRpcParams());
     }
 
     private void LateUpdate()
     {
-        // everyone applies the latest yaw & pitch
         cannonBase.localRotation = baseRotation.Value;
         cannonHead.localEulerAngles = new Vector3(headPitch.Value, 0f, 0f);
     }
 
-    // Runs on the server—updates our yaw & pitch NVs from client‐sent deltas
     [ServerRpc(RequireOwnership = false)]
-    private void UpdateRotationServerRpc(float yawDelta, float pitchDelta)
+    private void UpdateRotationServerRpc(float yawDelta, float pitchDelta, ServerRpcParams _ = default)
     {
-        // apply yaw
         float newYaw = (baseRotation.Value.eulerAngles.y + yawDelta) % 360f;
-
-        // apply and clamp pitch
-        float newPitch = headPitch.Value - pitchDelta;
-        newPitch = Mathf.Clamp(newPitch, minPitch, maxPitch);
-
+        float newPitch = Mathf.Clamp(headPitch.Value - pitchDelta, minPitch, maxPitch);
         baseRotation.Value = Quaternion.Euler(0f, newYaw, 0f);
         headPitch.Value = newPitch;
     }
 
-    // Your existing shooting RPC (no changes needed here)
     [ServerRpc(RequireOwnership = false)]
-    private void FireServerRpc()
+    private void FireServerRpc(ServerRpcParams _ = default)
     {
-        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out var hit))
-            Debug.Log("Hit: " + hit.transform.name);
+        // authoritative raycast on server, using your ScriptableObject values
+        if (Physics.Raycast(
+                shootPoint.position,
+                shootPoint.forward,
+                out RaycastHit hit,
+                gunStats.bulletRange))
+        {
+            if (hit.transform.TryGetComponent<IDamageable>(out var target))
+            {
+                target.TakeDamage(gunStats.damage);
+                Debug.Log($"[Server] Damaged {hit.transform.name} for {gunStats.damage}. Remaining HP: {target.CurrentHealth}");
+            }
+            else
+            {
+                Debug.Log($"[Server] Hit {hit.transform.name} (not damageable)");
+            }
+        }
         else
-            Debug.Log("Missed");
+        {
+            Debug.Log("[Server] Missed");
+        }
     }
 }

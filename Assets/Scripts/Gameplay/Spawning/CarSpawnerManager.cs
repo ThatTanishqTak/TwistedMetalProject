@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.SceneManagement;
 
 public class CarSpawnerManager : NetworkBehaviour
 {
@@ -34,23 +33,6 @@ public class CarSpawnerManager : NetworkBehaviour
 
         ComputeGroundBounds();
         SpawnCars();
-
-        NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadCompleted;
-    }
-
-    private void OnLoadCompleted(string sceneName,
-                                 LoadSceneMode loadMode,
-                                 List<ulong> clientsCompleted,
-                                 List<ulong> clientsTimedOut)
-    {
-        if (!IsServer) return;
-
-        
-        if (team1CarInstance != null) Destroy(team1CarInstance);
-        if (team2CarInstance != null) Destroy(team2CarInstance);
-
-        ComputeGroundBounds();
-        SpawnCars();
     }
 
     private void ComputeGroundBounds()
@@ -62,7 +44,8 @@ public class CarSpawnerManager : NetworkBehaviour
         if (groundCols.Length == 0)
         {
             Debug.LogError("CarSpawnerManager: No ground Colliders found on your ground layer!");
-            groundBounds = new Bounds(Vector3.zero, Vector3.one * 100f);
+            // fallback to a flat ground at y = 0
+            groundBounds = new Bounds(new Vector3(0, 0, 0), Vector3.one * 100f);
             return;
         }
 
@@ -84,6 +67,7 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private Vector3 SampleSpawnPoint(TeamType team)
     {
+        // region bounds
         float minX = groundBounds.min.x;
         float maxX = groundBounds.max.x;
         float midX = groundBounds.center.x;
@@ -93,6 +77,7 @@ public class CarSpawnerManager : NetworkBehaviour
         float regionMinX = team == TeamType.TeamA ? minX : midX;
         float regionMaxX = team == TeamType.TeamA ? midX : maxX;
 
+        // try random points
         for (int i = 0; i < maxSpawnAttempts; i++)
         {
             float x = Random.Range(regionMinX, regionMaxX);
@@ -100,12 +85,11 @@ public class CarSpawnerManager : NetworkBehaviour
             Vector3 origin = new Vector3(x, groundBounds.max.y + rayStartHeight, z);
 
             if (Physics.Raycast(origin, Vector3.down,
-                                out RaycastHit hit,
+                                out var hit,
                                 groundBounds.size.y + 2f * rayStartHeight,
                                 groundLayerMask))
             {
                 Vector3 candidate = hit.point;
-
                 if (!Physics.CheckSphere(candidate + Vector3.up * 0.5f,
                                          obstacleCheckRadius,
                                          obstacleLayerMask))
@@ -115,22 +99,22 @@ public class CarSpawnerManager : NetworkBehaviour
             }
         }
 
-        // Fallback: center of the region
-        float centerX = (regionMinX + regionMaxX) * 0.5f;
-        float centerZ = (minZ + maxZ) * 0.5f;
-        Vector3 fallbackOrigin = new Vector3(centerX,
-                                             groundBounds.max.y + rayStartHeight,
-                                             centerZ);
+        // Fallback: drop straight down at region-center but land at your ground's MINIMUM Y,
+        // not at y=0
+        float cx = (regionMinX + regionMaxX) * 0.5f;
+        float cz = (minZ + maxZ) * 0.5f;
+        Vector3 fallbackOrigin = new Vector3(cx, groundBounds.max.y + rayStartHeight, cz);
 
         if (Physics.Raycast(fallbackOrigin, Vector3.down,
-                            out RaycastHit fallbackHit,
+                            out var fallbackHit,
                             groundBounds.size.y + 2f * rayStartHeight,
                             groundLayerMask))
         {
             return fallbackHit.point;
         }
 
-        return new Vector3(centerX, 0f, centerZ);
+        // LAST RESORT: use groundBounds.min.y instead of 0
+        return new Vector3(cx, groundBounds.min.y, cz);
     }
 
     private GameObject SpawnCar(GameObject prefab, Vector3 position)
@@ -139,7 +123,7 @@ public class CarSpawnerManager : NetworkBehaviour
         if (go.TryGetComponent<NetworkObject>(out var net))
             net.Spawn();
         else
-            Debug.LogError("Car prefab is missing a NetworkObject!");
+            Debug.LogError("Car prefab missing NetworkObject!");
         return go;
     }
 
@@ -148,10 +132,7 @@ public class CarSpawnerManager : NetworkBehaviour
         var assignments = MultiplayerManager.Instance.GetAllTeamAssignments();
         foreach (var a in assignments)
         {
-            GameObject car = a.team == TeamType.TeamA
-                ? team1CarInstance
-                : team2CarInstance;
-
+            var car = (a.team == TeamType.TeamA) ? team1CarInstance : team2CarInstance;
             if (car == null) continue;
 
             var driver = car.GetComponent<CarControllerWrapper>();
@@ -165,11 +146,5 @@ public class CarSpawnerManager : NetworkBehaviour
                 shooter.SetShooterClientId(a.clientId);
             }
         }
-    }
-
-    private new void OnDestroy()
-    {
-        if (NetworkManager.Singleton != null)
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadCompleted;
     }
 }
