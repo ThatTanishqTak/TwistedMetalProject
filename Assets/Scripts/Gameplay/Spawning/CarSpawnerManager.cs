@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -16,15 +15,11 @@ public class CarSpawnerManager : NetworkBehaviour
     [SerializeField] private LayerMask obstacleLayerMask;
 
     [Header("Sampling Settings")]
-    [Tooltip("How many random attempts per team before fallback")]
     [SerializeField] private int maxSpawnAttempts = 10;
-    [Tooltip("Radius to check around a candidate for nearby obstacles")]
     [SerializeField] private float obstacleCheckRadius = 1f;
-    [Tooltip("Extra height above the map to start each raycast")]
     [SerializeField] private float rayStartHeight = 50f;
 
-    private GameObject team1CarInstance;
-    private GameObject team2CarInstance;
+    private GameObject team1CarInstance, team2CarInstance;
     private Bounds groundBounds;
 
     public override void OnNetworkSpawn()
@@ -37,114 +32,81 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void ComputeGroundBounds()
     {
-        var groundCols = FindObjectsOfType<Collider>()
-            .Where(c => ((1 << c.gameObject.layer) & groundLayerMask) != 0)
+        var cols = FindObjectsOfType<Collider>()
+            .Where(c => (groundLayerMask & (1 << c.gameObject.layer)) != 0)
             .ToArray();
 
-        if (groundCols.Length == 0)
+        if (cols.Length == 0)
         {
-            Debug.LogError("CarSpawnerManager: No ground Colliders found on your ground layer!");
-            // fallback to a flat ground at y = 0
-            groundBounds = new Bounds(new Vector3(0, 0, 0), Vector3.one * 100f);
+            Debug.LogError("No ground colliders on Ground layer!");
+            groundBounds = new Bounds(Vector3.zero, Vector3.one * 100f);
             return;
         }
 
-        groundBounds = groundCols[0].bounds;
-        for (int i = 1; i < groundCols.Length; i++)
-            groundBounds.Encapsulate(groundCols[i].bounds);
+        groundBounds = cols[0].bounds;
+        foreach (var c in cols.Skip(1))
+            groundBounds.Encapsulate(c.bounds);
     }
 
     private void SpawnCars()
     {
-        Vector3 posA = SampleSpawnPoint(TeamType.TeamA);
-        Vector3 posB = SampleSpawnPoint(TeamType.TeamB);
-
-        team1CarInstance = SpawnCar(team1CarPrefab, posA);
-        team2CarInstance = SpawnCar(team2CarPrefab, posB);
-
-        AssignRolesToPlayers();
+        team1CarInstance = SpawnCar(team1CarPrefab, SamplePoint(TeamType.TeamA));
+        team2CarInstance = SpawnCar(team2CarPrefab, SamplePoint(TeamType.TeamB));
+        AssignRoles();
     }
 
-    private Vector3 SampleSpawnPoint(TeamType team)
+    private Vector3 SamplePoint(TeamType team)
     {
-        // region bounds
-        float minX = groundBounds.min.x;
-        float maxX = groundBounds.max.x;
-        float midX = groundBounds.center.x;
-        float minZ = groundBounds.min.z;
-        float maxZ = groundBounds.max.z;
-
+        float minX = groundBounds.min.x, maxX = groundBounds.max.x, midX = groundBounds.center.x;
+        float minZ = groundBounds.min.z, maxZ = groundBounds.max.z;
         float regionMinX = team == TeamType.TeamA ? minX : midX;
         float regionMaxX = team == TeamType.TeamA ? midX : maxX;
 
-        // try random points
         for (int i = 0; i < maxSpawnAttempts; i++)
         {
-            float x = Random.Range(regionMinX, regionMaxX);
-            float z = Random.Range(minZ, maxZ);
-            Vector3 origin = new Vector3(x, groundBounds.max.y + rayStartHeight, z);
-
-            if (Physics.Raycast(origin, Vector3.down,
-                                out var hit,
-                                groundBounds.size.y + 2f * rayStartHeight,
+            var x = Random.Range(regionMinX, regionMaxX);
+            var z = Random.Range(minZ, maxZ);
+            var top = new Vector3(x, groundBounds.max.y + rayStartHeight, z);
+            if (Physics.Raycast(top, Vector3.down, out var hit,
+                                groundBounds.size.y + 2 * rayStartHeight,
                                 groundLayerMask))
             {
-                Vector3 candidate = hit.point;
-                if (!Physics.CheckSphere(candidate + Vector3.up * 0.5f,
+                var p = hit.point;
+                if (!Physics.CheckSphere(p + Vector3.up * 0.5f,
                                          obstacleCheckRadius,
                                          obstacleLayerMask))
-                {
-                    return candidate;
-                }
+                    return p;
             }
         }
 
-        // Fallback: drop straight down at region-center but land at your ground's MINIMUM Y,
-        // not at y=0
-        float cx = (regionMinX + regionMaxX) * 0.5f;
-        float cz = (minZ + maxZ) * 0.5f;
-        Vector3 fallbackOrigin = new Vector3(cx, groundBounds.max.y + rayStartHeight, cz);
-
-        if (Physics.Raycast(fallbackOrigin, Vector3.down,
-                            out var fallbackHit,
-                            groundBounds.size.y + 2f * rayStartHeight,
+        // fallback to center
+        float cx = (regionMinX + regionMaxX) / 2, cz = (minZ + maxZ) / 2;
+        var ftop = new Vector3(cx, groundBounds.max.y + rayStartHeight, cz);
+        if (Physics.Raycast(ftop, Vector3.down, out var fhit,
+                            groundBounds.size.y + 2 * rayStartHeight,
                             groundLayerMask))
-        {
-            return fallbackHit.point;
-        }
+            return fhit.point;
 
-        // LAST RESORT: use groundBounds.min.y instead of 0
         return new Vector3(cx, groundBounds.min.y, cz);
     }
 
-    private GameObject SpawnCar(GameObject prefab, Vector3 position)
+    private GameObject SpawnCar(GameObject prefab, Vector3 pos)
     {
-        var go = Instantiate(prefab, position, Quaternion.identity);
-        if (go.TryGetComponent<NetworkObject>(out var net))
-            net.Spawn();
-        else
-            Debug.LogError("Car prefab missing NetworkObject!");
+        var go = Instantiate(prefab, pos, Quaternion.identity);
+        if (go.TryGetComponent<NetworkObject>(out var net)) net.Spawn();
+        else UnityEngine.Debug.LogError("Car prefab needs a NetworkObject!");
         return go;
     }
 
-    private void AssignRolesToPlayers()
+    private void AssignRoles()
     {
-        var assignments = MultiplayerManager.Instance.GetAllTeamAssignments();
-        foreach (var a in assignments)
+        foreach (var a in MultiplayerManager.Instance.GetAllTeamAssignments())
         {
-            var car = (a.team == TeamType.TeamA) ? team1CarInstance : team2CarInstance;
-            if (car == null) continue;
-
-            var driver = car.GetComponent<CarControllerWrapper>();
-            var shooter = car.GetComponentInChildren<Shooter>();
-
-            if (a.role == RoleType.Driver)
-                driver.AssignDriver(a.clientId);
-            else
-            {
-                shooter.SetShooterAuthority(true);
-                shooter.SetShooterClientId(a.clientId);
-            }
+            var car = a.team == TeamType.TeamA ? team1CarInstance : team2CarInstance;
+            var d = car.GetComponent<CarControllerWrapper>();
+            var s = car.GetComponentInChildren<Shooter>();
+            if (a.role == RoleType.Driver) d.AssignDriver(a.clientId);
+            else { s.SetShooterAuthority(true); s.SetShooterClientId(a.clientId); }
         }
     }
 }
