@@ -13,10 +13,12 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private float minPitch = -10f;
     [SerializeField] private float maxPitch = 45f;
 
-    [Header("Shooter & GunStats")]
+    [Header("Shooter Reference")]
     [SerializeField] private Shooter shooter;
-    [Tooltip("Read range & damage from here")]
     [SerializeField] private GunStats gunStats;
+
+    // cooldown timer
+    private float lastFireTime;
 
     private NetworkVariable<Quaternion> baseRotation = new NetworkVariable<Quaternion>(
         Quaternion.identity,
@@ -40,7 +42,13 @@ public class TurretController : NetworkBehaviour
         UpdateRotationServerRpc(mx, my);
 
         if (Input.GetMouseButton(0))
-            FireServerRpc(new ServerRpcParams());
+        {
+            if (Time.time >= lastFireTime + gunStats.fireRate)
+            {
+                lastFireTime = Time.time;
+                FireServerRpc();
+            }
+        }
     }
 
     private void LateUpdate()
@@ -50,36 +58,33 @@ public class TurretController : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void UpdateRotationServerRpc(float yawDelta, float pitchDelta, ServerRpcParams _ = default)
+    private void UpdateRotationServerRpc(float yawDelta, float pitchDelta)
     {
         float newYaw = (baseRotation.Value.eulerAngles.y + yawDelta) % 360f;
-        float newPitch = Mathf.Clamp(headPitch.Value - pitchDelta, minPitch, maxPitch);
+        float newPitch = Mathf.Clamp(headPitch.Value - pitchDelta,
+                                     minPitch, maxPitch);
+
         baseRotation.Value = Quaternion.Euler(0f, newYaw, 0f);
         headPitch.Value = newPitch;
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void FireServerRpc(ServerRpcParams _ = default)
+    private void FireServerRpc()
     {
-        Debug.DrawRay(shootPoint.position, shootPoint.forward * gunStats.bulletRange, Color.red, 0.5f);
-
-        Debug.Log($"[FireServerRpc] Casting ray from {shootPoint.position:F2} " +
-              $"dir {shootPoint.forward:F2} at t={Time.time:F2}");
-
-        if (Physics.Raycast(
-                shootPoint.position,
-                shootPoint.forward,
-                out RaycastHit hit,
-                gunStats.bulletRange))
+        if (Physics.Raycast(shootPoint.position,
+                            shootPoint.forward,
+                            out var hit,
+                            gunStats.bulletRange))
         {
             if (hit.transform.TryGetComponent<IDamageable>(out var target))
             {
                 target.TakeDamage(gunStats.damage);
-                Debug.Log($"[Server] Damaged {hit.transform.name} for {gunStats.damage}. Remaining HP: {target.CurrentHealth}");
+                Debug.Log($"[Server] Hit {hit.transform.name} for {gunStats.damage}  " +
+                          $"(remaining {target.CurrentHealth})");
             }
             else
             {
-                Debug.Log($"[Server] Hit {hit.transform.name} (not damageable)");
+                Debug.Log($"[Server] Hit {hit.transform.name}, not damageable");
             }
         }
         else

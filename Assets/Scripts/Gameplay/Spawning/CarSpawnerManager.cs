@@ -35,9 +35,11 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void ComputeGroundBounds()
     {
-        // modern API: returns all Colliders (active & inactive)
         var groundCols = Object
-            .FindObjectsByType<Collider>(FindObjectsSortMode.None)
+            .FindObjectsByType<Collider>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            )
             .Where(c => ((1 << c.gameObject.layer) & groundLayerMask) != 0)
             .ToArray();
 
@@ -56,8 +58,6 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private void SpawnCars()
     {
-        Debug.Log($"[CarSpawner:{gameObject.name} | Scene:{gameObject.scene.name}] SpawnCars() called");
-
         Vector3 posA = SampleSpawnPoint(TeamType.TeamA);
         Vector3 posB = SampleSpawnPoint(TeamType.TeamB);
 
@@ -69,9 +69,6 @@ public class CarSpawnerManager : NetworkBehaviour
 
     private GameObject SpawnCar(GameObject prefab, Vector3 position)
     {
-        Debug.Log($"[CarSpawner:{gameObject.name} | Scene:{gameObject.scene.name}] " +
-                  $"Instantiating {prefab.name} at {position}");
-
         var go = Instantiate(prefab, position, Quaternion.identity);
         if (go.TryGetComponent<NetworkObject>(out var net))
             net.Spawn();
@@ -94,12 +91,16 @@ public class CarSpawnerManager : NetworkBehaviour
             float z = Random.Range(minZ, maxZ);
             var origin = new Vector3(x, groundBounds.max.y + rayStartHeight, z);
 
-            if (Physics.Raycast(origin, Vector3.down,
+            if (Physics.Raycast(origin,
+                                Vector3.down,
                                 out var hit,
                                 groundBounds.size.y + 2f * rayStartHeight,
                                 groundLayerMask))
             {
-                var candidate = hit.point;
+                if (Vector3.Dot(hit.normal, Vector3.up) < 0.7f)
+                    continue;
+
+                Vector3 candidate = hit.point;
                 if (!Physics.CheckSphere(candidate + Vector3.up * 0.5f,
                                          obstacleCheckRadius,
                                          obstacleLayerMask))
@@ -107,12 +108,12 @@ public class CarSpawnerManager : NetworkBehaviour
             }
         }
 
-        // fallback: center of region, dropping to groundBounds.min.y
         float cx = (regionMinX + regionMaxX) * 0.5f;
         float cz = (minZ + maxZ) * 0.5f;
         var top = new Vector3(cx, groundBounds.max.y + rayStartHeight, cz);
 
-        if (Physics.Raycast(top, Vector3.down,
+        if (Physics.Raycast(top,
+                            Vector3.down,
                             out var fhit,
                             groundBounds.size.y + 2f * rayStartHeight,
                             groundLayerMask))
@@ -127,9 +128,7 @@ public class CarSpawnerManager : NetworkBehaviour
     {
         foreach (var a in MultiplayerManager.Instance.GetAllTeamAssignments())
         {
-            var car = (a.team == TeamType.TeamA)
-                ? team1CarInstance
-                : team2CarInstance;
+            var car = (a.team == TeamType.TeamA) ? team1CarInstance : team2CarInstance;
             if (car == null) continue;
 
             var driver = car.GetComponent<CarControllerWrapper>();
@@ -154,7 +153,6 @@ public class CarSpawnerManager : NetworkBehaviour
             && net1.IsSpawned)
         {
             net1.Despawn(true);
-            Debug.Log($"[CarSpawner:{gameObject.name} | Scene:{gameObject.scene.name}] Despawning team1CarInstance");
         }
 
         if (team2CarInstance != null
@@ -162,7 +160,6 @@ public class CarSpawnerManager : NetworkBehaviour
             && net2.IsSpawned)
         {
             net2.Despawn(true);
-            Debug.Log($"[CarSpawner:{gameObject.name} | Scene:{gameObject.scene.name}] Despawning team2CarInstance");
         }
     }
 }

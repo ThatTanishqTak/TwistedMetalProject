@@ -1537,6 +1537,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Multiplayer.Tools.NetVis.Configuration">
+      <HintPath>Library\ScriptAssemblies\Unity.Multiplayer.Tools.NetVis.Configuration.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Services.Core.Environments">
       <HintPath>Library\ScriptAssemblies\Unity.Services.Core.Environments.dll</HintPath>
       <Private>False</Private>
@@ -1547,10 +1551,6 @@
     </Reference>
     <Reference Include="Unity.Services.Multiplayer.Editor.Matchmaker.Authoring">
       <HintPath>Library\ScriptAssemblies\Unity.Services.Multiplayer.Editor.Matchmaker.Authoring.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Multiplayer.Tools.NetVis.Configuration">
-      <HintPath>Library\ScriptAssemblies\Unity.Multiplayer.Tools.NetVis.Configuration.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Multiplayer.Tools.NetStatsReporting">
