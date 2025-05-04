@@ -162,4 +162,8 @@ public class CarSpawnerManager : NetworkBehaviour
             net2.Despawn(true);
         }
     }
-}
+    public GameObject GetCarForTeam(TeamType team)
+        => team == TeamType.TeamA
+            ? team1CarInstance
+            : team2CarInstance;
+}//NEW SCRIPT

@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
@@ -8,10 +9,14 @@ public class Health : NetworkBehaviour, IDamageable
     [Header("Health Settings")]
     [Tooltip("Max HP for this object")]
     [SerializeField] private float maxHealth = 100f;
+    public float MaxHealth => maxHealth;
+
     [Tooltip("Seconds to wait before respawning in Arena")]
     [SerializeField] private float respawnDelay = 5f;
 
-    private NetworkVariable<float> currentHealth = new NetworkVariable<float>(
+    public event Action<float, float> OnHealthChangedEvent;
+
+    public NetworkVariable<float> currentHealth = new NetworkVariable<float>(
         0f,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
@@ -20,6 +25,8 @@ public class Health : NetworkBehaviour, IDamageable
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool visualsHidden = false;
+
+    private bool healthEnabled = false;
 
     public float CurrentHealth => currentHealth.Value;
 
@@ -31,17 +38,33 @@ public class Health : NetworkBehaviour, IDamageable
             spawnRot = transform.rotation;
             currentHealth.Value = maxHealth;
         }
-        currentHealth.OnValueChanged += OnHealthChanged;
+
+        currentHealth.OnValueChanged += HandleHealthChanged;
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
-    private void OnHealthChanged(float oldHp, float newHp)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //Left for healthbar UI
+        healthEnabled = (scene.name == Loader.Scene.Arena.ToString());
+
+        if (healthEnabled && IsServer)
+        {
+            currentHealth.Value = maxHealth;
+            SetVisuals(true);
+        }
+    }
+
+    private void HandleHealthChanged(float oldHp, float newHp)
+    {
+        OnHealthChangedEvent?.Invoke(oldHp, newHp);
     }
 
     public void TakeDamage(float amount)
     {
-        if (!IsServer) return;
+        if (!IsServer || !healthEnabled) return;
 
         currentHealth.Value = Mathf.Max(0f, currentHealth.Value - amount);
         if (currentHealth.Value <= 0f)
@@ -60,8 +83,9 @@ public class Health : NetworkBehaviour, IDamageable
     {
         yield return new WaitForSeconds(respawnDelay);
 
-        currentHealth.Value = maxHealth;
+        if (!healthEnabled) yield break;
 
+        currentHealth.Value = maxHealth;
         transform.position = spawnPos;
         transform.rotation = spawnRot;
 
@@ -87,13 +111,13 @@ public class Health : NetworkBehaviour, IDamageable
 
         foreach (var r in GetComponentsInChildren<Renderer>())
             r.enabled = active;
-
         foreach (var c in GetComponentsInChildren<Collider>())
             c.enabled = active;
     }
 
     private new void OnDestroy()
     {
-        currentHealth.OnValueChanged -= OnHealthChanged;
+        currentHealth.OnValueChanged -= HandleHealthChanged;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }
