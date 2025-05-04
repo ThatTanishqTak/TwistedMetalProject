@@ -61,7 +61,11 @@ public class TurretController : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void FireServerRpc(ServerRpcParams _ = default)
     {
-        // authoritative raycast on server, using your ScriptableObject values
+        Debug.DrawRay(shootPoint.position, shootPoint.forward * gunStats.bulletRange, Color.red, 0.5f);
+
+        Debug.Log($"[FireServerRpc] Casting ray from {shootPoint.position:F2} " +
+              $"dir {shootPoint.forward:F2} at t={Time.time:F2}");
+
         if (Physics.Raycast(
                 shootPoint.position,
                 shootPoint.forward,
