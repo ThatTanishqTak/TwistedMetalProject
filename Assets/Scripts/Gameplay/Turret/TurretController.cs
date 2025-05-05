@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
 using Unity.Netcode;
+using UnityEngine;
 
 public class TurretController : NetworkBehaviour
 {
@@ -17,7 +18,10 @@ public class TurretController : NetworkBehaviour
     [SerializeField] private Shooter shooter;
     [SerializeField] private GunStats gunStats;
 
-    // cooldown timer
+    [Header("VFX")]
+    [Tooltip("Assign a muzzle-flash ParticleSystem here, parented at the shoot point")]
+    [SerializeField] private ParticleSystem muzzleFlash;
+
     private float lastFireTime;
 
     private NetworkVariable<Quaternion> baseRotation = new NetworkVariable<Quaternion>(
@@ -79,7 +83,7 @@ public class TurretController : NetworkBehaviour
             if (hit.transform.TryGetComponent<IDamageable>(out var target))
             {
                 target.TakeDamage(gunStats.damage);
-                Debug.Log($"[Server] Hit {hit.transform.name} for {gunStats.damage}  " +
+                Debug.Log($"[Server] Hit {hit.transform.name} for {gunStats.damage} " +
                           $"(remaining {target.CurrentHealth})");
             }
             else
@@ -91,5 +95,26 @@ public class TurretController : NetworkBehaviour
         {
             Debug.Log("[Server] Missed");
         }
+
+        MuzzleFlashClientRpc();
     }
+
+    [ClientRpc]
+    private void MuzzleFlashClientRpc()
+    {
+        if (muzzleFlash == null)
+        {
+            Debug.LogWarning("[TurretController] MuzzleFlash is null!");
+            return;
+        }
+
+        muzzleFlash.transform.position = shootPoint.position;
+        muzzleFlash.transform.rotation = shootPoint.rotation;
+
+        muzzleFlash.Clear();
+        muzzleFlash.Emit(1);
+
+        Debug.Log($"[TurretController] Emitted muzzle flash at {shootPoint.position}");
+    }
+
 }
