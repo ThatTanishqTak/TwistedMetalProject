@@ -9,9 +9,8 @@ public class HealthUIManager : MonoBehaviour
 {
     [Header("Hook these up in the Inspector")]
     [SerializeField] private TextMeshProUGUI roleLabel;
-    [SerializeField] private int respawnDelayTimer = 1;
+
     private GameObject respawnPanel;
-    
     private Health _healthComponent;
     private bool _subscribed;
 
@@ -103,6 +102,7 @@ public class HealthUIManager : MonoBehaviour
             Debug.Log("[HealthUI] No assignment yet");
             return;
         }
+
         roleLabel.text = $"{assignment.team} {assignment.role}";
         gameObject.SetActive(true);
 
@@ -147,19 +147,46 @@ public class HealthUIManager : MonoBehaviour
     {
         Debug.Log("[HealthUI] ShowRespawnPanel()");
         if (respawnPanel != null)
+        {
             respawnPanel.SetActive(true);
+            StartCoroutine(RespawnCountdownCoroutine());
+        }
     }
 
     private void HideRespawnPanel()
     {
         Debug.Log("[HealthUI] HideRespawnPanel()");
-        if (respawnPanel != null)
-            StartCoroutine(HideAfterDelay());
+        StartCoroutine(HideAfterDelay());
+    }
+
+    private IEnumerator RespawnCountdownCoroutine()
+    {
+        float remaining = 5f;
+
+        var timerText = respawnPanel
+            .transform
+            .Find("RespawningSeconds/SecondsTMP")
+            ?.GetComponent<TextMeshProUGUI>();
+
+        if (timerText == null)
+        {
+            Debug.LogWarning("[HealthUI] SecondsTMP not found under RespawningSeconds!");
+            yield break;
+        }
+
+        while (remaining > 0f)
+        {
+            timerText.text = $"Respawning in {remaining:0}s";
+            yield return new WaitForSeconds(1f);
+            remaining -= 1f;
+        }
+
+        timerText.text = "Respawning in 0s";
     }
 
     private IEnumerator HideAfterDelay()
     {
-        yield return new WaitForSeconds(respawnDelayTimer);
+        yield return new WaitForSeconds(1f);
         respawnPanel.SetActive(false);
     }
 
