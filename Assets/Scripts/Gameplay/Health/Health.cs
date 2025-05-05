@@ -15,6 +15,8 @@ public class Health : NetworkBehaviour, IDamageable
     [SerializeField] private float respawnDelay = 5f;
 
     public event Action<float, float> OnHealthChangedEvent;
+    public event Action OnDied;
+    public event Action OnRespawned;
 
     public NetworkVariable<float> currentHealth = new NetworkVariable<float>(
         0f,
@@ -39,16 +41,13 @@ public class Health : NetworkBehaviour, IDamageable
         }
 
         currentHealth.OnValueChanged += HandleHealthChanged;
-
         SceneManager.sceneLoaded += OnSceneLoaded;
-
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         healthEnabled = (scene.name == Loader.Scene.Arena.ToString());
-
         if (healthEnabled && IsServer)
         {
             currentHealth.Value = maxHealth;
@@ -61,18 +60,15 @@ public class Health : NetworkBehaviour, IDamageable
         OnHealthChangedEvent?.Invoke(oldHp, newHp);
     }
 
-  
     public void TakeDamage(float amount)
     {
-        if (!IsServer || !healthEnabled)
-            return;
+        if (!IsServer || !healthEnabled) return;
 
         float oldHp = currentHealth.Value;
         float newHp = Mathf.Max(0f, oldHp - amount);
         currentHealth.Value = newHp;
 
         OnHealthChangedEvent?.Invoke(oldHp, newHp);
-
         HealthChangedClientRpc(oldHp, newHp);
 
         if (newHp <= 0f)
@@ -82,7 +78,6 @@ public class Health : NetworkBehaviour, IDamageable
     private void Die()
     {
         DeathClientRpc();
-
         if (SceneManager.GetActiveScene().name == Loader.Scene.Arena.ToString())
             StartCoroutine(RespawnCoroutine());
     }
@@ -90,13 +85,11 @@ public class Health : NetworkBehaviour, IDamageable
     private IEnumerator RespawnCoroutine()
     {
         yield return new WaitForSeconds(respawnDelay);
-
         if (!healthEnabled) yield break;
 
         currentHealth.Value = maxHealth;
         transform.position = spawnPos;
         transform.rotation = spawnRot;
-
         RespawnClientRpc();
     }
 
@@ -104,15 +97,16 @@ public class Health : NetworkBehaviour, IDamageable
     private void DeathClientRpc()
     {
         SetVisuals(false);
+        OnDied?.Invoke();
     }
 
     [ClientRpc]
     private void RespawnClientRpc()
     {
         SetVisuals(true);
+        OnRespawned?.Invoke();
     }
 
-   
     [ClientRpc]
     private void HealthChangedClientRpc(float oldHp, float newHp)
     {

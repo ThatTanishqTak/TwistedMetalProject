@@ -1,38 +1,35 @@
 ﻿using System;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class HealthUIManager : MonoBehaviour
 {
     [Header("Hook these up in the Inspector")]
-    [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI roleLabel;
-
+    [SerializeField] private int respawnDelayTimer = 1;
+    private GameObject respawnPanel;
+    
     private Health _healthComponent;
     private bool _subscribed;
 
     private void Awake()
     {
-        Debug.Log("[HealthUI] Awake – making me persistent");
+        Debug.Log("[HealthUI] Awake – persisting");
         DontDestroyOnLoad(gameObject);
     }
 
     private void OnEnable()
     {
         Debug.Log("[HealthUI] OnEnable – isClient? " + NetworkManager.Singleton.IsClient);
-        // Only clients ever see the UI
         if (!NetworkManager.Singleton.IsClient)
         {
-            Debug.Log("[HealthUI] Not a client; hiding UI");
             gameObject.SetActive(false);
             return;
         }
 
-        // Subscribe events exactly once
         if (!_subscribed)
         {
             Debug.Log("[HealthUI] Subscribing OnTeamsFormed & sceneLoaded");
@@ -41,16 +38,14 @@ public class HealthUIManager : MonoBehaviour
             _subscribed = true;
         }
 
-        // Try setup immediately in case teams are already formed
         TryInitialize();
     }
 
     private void OnDisable()
     {
-        Debug.Log("[HealthUI] OnDisable – cleaning up");
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient && _subscribed)
+        Debug.Log("[HealthUI] OnDisable – unhooking");
+        if (_subscribed)
         {
-            Debug.Log("[HealthUI] Unsubscribing events");
             MultiplayerManager.Instance.OnTeamsFormed -= OnTeamsFormed;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             _subscribed = false;
@@ -58,16 +53,10 @@ public class HealthUIManager : MonoBehaviour
 
         if (_healthComponent != null)
         {
-            Debug.Log("[HealthUI] Unhooking OnHealthChangedEvent");
-            _healthComponent.OnHealthChangedEvent -= OnHealthChanged;
+            _healthComponent.OnDied -= ShowRespawnPanel;
+            _healthComponent.OnRespawned -= HideRespawnPanel;
             _healthComponent = null;
         }
-    }
-
-    private void OnDestroy()
-    {
-        Debug.Log("[HealthUI] OnDestroy");
-        OnDisable();
     }
 
     private void OnTeamsFormed(object _, EventArgs __)
@@ -78,54 +67,71 @@ public class HealthUIManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"[HealthUI] OnSceneLoaded: {scene.name}");
+        Debug.Log($"[HealthUI] Scene loaded: {scene.name}");
+        if (scene.name == Loader.Scene.Arena.ToString())
+        {
+            respawnPanel = GameObject.Find("RespawnCanvas")
+                             ?.transform.Find("RespawnPanel")
+                             ?.gameObject;
+            if (respawnPanel == null)
+                Debug.LogWarning("[HealthUI] RespawnPanel NOT found!");
+            else
+            {
+                Debug.Log("[HealthUI] RespawnPanel found, hiding initially");
+                respawnPanel.SetActive(false);
+            }
+        }
+
         TryInitialize();
     }
 
     private void TryInitialize()
     {
-        // already hooked?
+        Debug.Log("[HealthUI] TryInitialize()");
         if (_healthComponent != null)
         {
-            Debug.Log("[HealthUI] Already initialized, skipping");
+            Debug.Log("[HealthUI] Already have Health, skipping");
             return;
         }
 
-        // 1) find my assignment
         var myId = NetworkManager.Singleton.LocalClientId;
         var assignment = MultiplayerManager.Instance
-            .GetAllTeamAssignments()
-            .FirstOrDefault(a => a.clientId == myId);
-
-        Debug.Log($"[HealthUI] My assignment: {assignment.team} / {assignment.role}");
+                             .GetAllTeamAssignments()
+                             .Find(a => a.clientId == myId);
         if (assignment.Equals(default(TeamRoleData)))
         {
-            // not yet assigned, show an empty UI
-            roleLabel.text = "";
+            Debug.Log("[HealthUI] No assignment yet");
             return;
         }
-
-        // 2) show & label
-        Debug.Log("[HealthUI] Showing UI and setting label");
-        gameObject.SetActive(true);
         roleLabel.text = $"{assignment.team} {assignment.role}";
+        gameObject.SetActive(true);
 
-        // 3) find my car via the spawner
-        var spawner = UnityEngine.Object.FindFirstObjectByType<CarSpawnerManager>();
-        if (spawner == null)
+        Debug.Log("[HealthUI] Looking for PlayerCar tagged objects…");
+        foreach (var car in GameObject.FindGameObjectsWithTag("PlayerCar"))
         {
-            Debug.LogError("[HealthUI] No CarSpawnerManager found!");
-            return;
+            var wrapper = car.GetComponent<CarControllerWrapper>();
+            if (wrapper != null && wrapper.DrivingClientId == myId)
+            {
+                HookInto(car);
+                return;
+            }
+
+            var shooter = car.GetComponentInChildren<Shooter>();
+            if (shooter != null
+             && shooter.IsShooterControlled
+             && shooter.ShooterClientId == myId)
+            {
+                HookInto(car);
+                return;
+            }
         }
 
-        var car = spawner.GetCarForTeam(assignment.team);
-        if (car == null)
-        {
-            Debug.LogError($"[HealthUI] No car for team {assignment.team}");
-            return;
-        }
+        Debug.LogWarning("[HealthUI] No PlayerCar with my clientId found yet; will retry when teams form or next scene load.");
+    }
 
-        // 4) hook into its Health component
+    private void HookInto(GameObject car)
+    {
+        Debug.Log($"[HealthUI] Found my car ({car.name}), hooking Health…");
         _healthComponent = car.GetComponent<Health>();
         if (_healthComponent == null)
         {
@@ -133,17 +139,38 @@ public class HealthUIManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("[HealthUI] Initializing slider values");
-        healthSlider.maxValue = _healthComponent.MaxHealth;
-        healthSlider.value = _healthComponent.CurrentHealth;
-
-        Debug.Log("[HealthUI] Subscribing to OnHealthChangedEvent");
-        _healthComponent.OnHealthChangedEvent += OnHealthChanged;
+        _healthComponent.OnDied += ShowRespawnPanel;
+        _healthComponent.OnRespawned += HideRespawnPanel;
     }
 
-    private void OnHealthChanged(float oldHp, float newHp)
+    private void ShowRespawnPanel()
     {
-        Debug.Log($"[HealthUI] Health changed from {oldHp} → {newHp}");
-        healthSlider.value = newHp;
+        Debug.Log("[HealthUI] ShowRespawnPanel()");
+        if (respawnPanel != null)
+            respawnPanel.SetActive(true);
+    }
+
+    private void HideRespawnPanel()
+    {
+        Debug.Log("[HealthUI] HideRespawnPanel()");
+        if (respawnPanel != null)
+            StartCoroutine(HideAfterDelay());
+    }
+
+    private IEnumerator HideAfterDelay()
+    {
+        yield return new WaitForSeconds(respawnDelayTimer);
+        respawnPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (NetworkManager.Singleton.IsClient
+            && _healthComponent == null
+            && SceneManager.GetActiveScene().name == Loader.Scene.Arena.ToString())
+        {
+            Debug.Log("[HealthUI] Update(): retrying TryInitialize");
+            TryInitialize();
+        }
     }
 }

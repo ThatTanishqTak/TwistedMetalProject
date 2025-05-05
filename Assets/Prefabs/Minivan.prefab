@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 6009308636597930049}
   m_Layer: 0
   m_Name: Minivan
-  m_TagString: Car
+  m_TagString: PlayerCar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -230,6 +230,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   maxHealth: 100
   respawnDelay: 5
+  currentHealth:
+    m_InternalValue: 0
 --- !u!1 &338086867605006288
 GameObject:
   m_ObjectHideFlags: 0
