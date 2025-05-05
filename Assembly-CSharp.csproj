@@ -65,8 +65,8 @@
     <Compile Include="Assets\Scripts\Core\Interfaces\ICarMovement.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\Manager\VehicleCameraManager.cs" />
-    <Compile Include="Assets\Scripts\User Interface\PlayerHealthUI.cs" />
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
+    <Compile Include="Assets\Scripts\User Interface\HealthUIManager.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Turret\ShooterCameraController.cs" />
     <Compile Include="Assets\Scripts\Player\TeamRoleData.cs" />
@@ -100,7 +100,6 @@
     <Compile Include="Assets\Scripts\Gameplay\Shooting\IShooter.cs" />
     <Compile Include="Assets\Scripts\Manager\LobbyCountdownManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterReady.cs" />
-    <Compile Include="Assets\Scripts\User Interface\PersistHealthUI.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Spawning\CarSpawnerManager.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1357,6 +1356,10 @@
     </Reference>
     <Reference Include="Unity.Services.Multiplayer.Editor.Shared">
       <HintPath>Library\ScriptAssemblies\Unity.Services.Multiplayer.Editor.Shared.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.Sprite.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Services.Multiplayer.Multiplay.Authoring.Core">

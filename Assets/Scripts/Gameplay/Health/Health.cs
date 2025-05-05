@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Health : NetworkBehaviour, IDamageable
@@ -25,7 +25,6 @@ public class Health : NetworkBehaviour, IDamageable
     private Vector3 spawnPos;
     private Quaternion spawnRot;
     private bool visualsHidden = false;
-
     private bool healthEnabled = false;
 
     public float CurrentHealth => currentHealth.Value;
@@ -62,12 +61,21 @@ public class Health : NetworkBehaviour, IDamageable
         OnHealthChangedEvent?.Invoke(oldHp, newHp);
     }
 
+  
     public void TakeDamage(float amount)
     {
-        if (!IsServer || !healthEnabled) return;
+        if (!IsServer || !healthEnabled)
+            return;
 
-        currentHealth.Value = Mathf.Max(0f, currentHealth.Value - amount);
-        if (currentHealth.Value <= 0f)
+        float oldHp = currentHealth.Value;
+        float newHp = Mathf.Max(0f, oldHp - amount);
+        currentHealth.Value = newHp;
+
+        OnHealthChangedEvent?.Invoke(oldHp, newHp);
+
+        HealthChangedClientRpc(oldHp, newHp);
+
+        if (newHp <= 0f)
             Die();
     }
 
@@ -102,6 +110,13 @@ public class Health : NetworkBehaviour, IDamageable
     private void RespawnClientRpc()
     {
         SetVisuals(true);
+    }
+
+   
+    [ClientRpc]
+    private void HealthChangedClientRpc(float oldHp, float newHp)
+    {
+        OnHealthChangedEvent?.Invoke(oldHp, newHp);
     }
 
     private void SetVisuals(bool active)
