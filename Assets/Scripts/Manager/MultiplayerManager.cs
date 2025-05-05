@@ -1,11 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Netcode;
 using System;
 using UnityEngine.SceneManagement;
-using NUnit.Framework;
 using System.Collections.Generic;
 
-/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
+/* --MAKE SURE WE REMOVE ALL THE DEBUG STATEMENTS BEFORE WE BUILD THE FINAL VERSION-- */
 
 public class MultiplayerManager : NetworkBehaviour
 {
@@ -19,12 +18,14 @@ public class MultiplayerManager : NetworkBehaviour
     private NetworkList<PlayerData> playerDataNetworkList;
     private NetworkList<TeamRoleData> teamRoleAssignments;
 
+    int numberOfTeams = 0;
+
     private void Awake()
     {
         Instance = this;
 
         DontDestroyOnLoad(gameObject);
-    
+
         playerDataNetworkList = new NetworkList<PlayerData>();
         teamRoleAssignments = new NetworkList<TeamRoleData>();
 
@@ -32,11 +33,7 @@ public class MultiplayerManager : NetworkBehaviour
         teamRoleAssignments.OnListChanged += TeamRoleAssignments_OnListChanged;
     }
 
-    private void TeamRoleAssignments_OnListChanged(NetworkListEvent<TeamRoleData> changeEvent)
-    {
-        
-    }
-
+    private void TeamRoleAssignments_OnListChanged(NetworkListEvent<TeamRoleData> changeEvent) { }
     private void PlayerDataNetworkList_OnListChanged(NetworkListEvent<PlayerData> changeEvent)
     {
         OnPlayerDataNetworkListChanged?.Invoke(this, EventArgs.Empty);
@@ -47,137 +44,140 @@ public class MultiplayerManager : NetworkBehaviour
     {
         if (playerDataNetworkList.Count == GameLobby.Instance.GetLobby().MaxPlayers)
         {
+            numberOfTeams = GameLobby.Instance.GetLobby().MaxPlayers / 2;
+
             FormTeamsServerRpc();
         }
+    }
+
+    //[ServerRpc(RequireOwnership = false)]
+    //private void FormTeamsServerRpc()
+    //{
+    //    int totalTeam = GameLobby.Instance.GetLobby().MaxPlayers / 2;
+
+    //    teamRoleAssignments.Clear();
+
+    //    TeamType team;
+    //    RoleType role;
+
+    //    int currentPlayerIndex = 0; 
+
+    //    for (int teamNumber = 0; teamNumber < totalTeam; teamNumber++)
+    //    {
+    //        if (teamNumber == 0)
+    //        {
+    //            team = TeamType.TeamA;
+    //        }
+    //        else if (teamNumber == 1)
+    //        {
+    //            team = TeamType.TeamB;
+    //        }
+    //        else if (teamNumber == 2)
+    //        {
+    //            team = TeamType.TeamC;
+    //        }
+    //        else
+    //        {
+    //            team = TeamType.TeamD;
+    //        }
+
+    //        for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
+    //        {
+    //            role = (roleIndex == 0) ? RoleType.Driver : RoleType.Shooter;
+
+    //            TeamRoleData newData = new TeamRoleData
+    //            {
+    //                team = team,
+    //                role = role,
+    //                teamNumber = teamNumber,
+    //                clientId = playerDataNetworkList[currentPlayerIndex].clientID // ✅ assign correctly
+    //            };
+
+    //            teamRoleAssignments.Add(newData);
+
+    //            Debug.Log("[TeamAssignment] Player " + playerDataNetworkList[currentPlayerIndex].playerName + " assigned as " + newData.team + " " + newData.role + " ClientID: " + newData.clientId);
+
+    //            currentPlayerIndex++;
+    //        }
+    //    }
+
+    //    TeamsFormedClientRpc();
+    //}
+
+    private bool Exists(Func<TeamRoleData, bool> predicate)
+    {
+        foreach (var item in teamRoleAssignments)
+        {
+            if (predicate(item))
+                return true;
+        }
+        return false;
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void FormTeamsServerRpc()
     {
-        int totalTeam = GameLobby.Instance.GetLobby().MaxPlayers / 2;
-
         teamRoleAssignments.Clear();
 
-        Debug.Log(totalTeam);
-
-        TeamType team;
-        RoleType role;
-
-        for (int teamNumber = 0; teamNumber < totalTeam; teamNumber++)
+        // Correctly copy data, avoid invalid cast
+        List<PlayerData> unassignedPlayers = new List<PlayerData>();
+        foreach (var playerData in playerDataNetworkList)
         {
-            if (teamNumber == 0)
+            unassignedPlayers.Add(playerData);
+        }
+
+        // Shuffle players randomly
+        for (int i = 0; i < unassignedPlayers.Count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, unassignedPlayers.Count);
+            (unassignedPlayers[i], unassignedPlayers[randomIndex]) = (unassignedPlayers[randomIndex], unassignedPlayers[i]);
+        }
+
+        int numberOfTeams = unassignedPlayers.Count / 2;
+        int currentPlayerIndex = 0;
+
+        for (int teamNumber = 0; teamNumber < numberOfTeams; teamNumber++) // 1st loop: assign teams
+        {
+            TeamType team = teamNumber switch
             {
-                team = TeamType.TeamA;
+                0 => TeamType.TeamA,
+                1 => TeamType.TeamB,
+                2 => TeamType.TeamC,
+                3 => TeamType.TeamD,
+                _ => TeamType.TeamA
+            };
 
-                for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
-                {
-
-                    role = roleIndex == 0 ? RoleType.Driver : RoleType.Shooter;
-
-                    roleIndex++;
-
-                    TeamRoleData newData = new TeamRoleData
-                    {
-                        team = team,
-                        role = role,
-                        teamNumber = teamNumber
-                    };
-
-                    teamRoleAssignments.Add(newData);
-                    Debug.Log(playerDataNetworkList.Name + " " + newData.team + " " + newData.role + " " + newData.teamNumber);
-                }
-            }
-
-            if (teamNumber == 1)
+            for (int roleIndex = 0; roleIndex < 2; roleIndex++) // 2nd nested loop: assign roles inside the team
             {
-                team = TeamType.TeamB;
-
-                for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
+                if (currentPlayerIndex >= unassignedPlayers.Count)
                 {
-
-                    role = roleIndex == 0 ? RoleType.Driver : RoleType.Shooter;
-
-                    roleIndex++;
-
-                    TeamRoleData newData = new TeamRoleData
-                    {
-                        team = team,
-                        role = role,
-                        teamNumber = teamNumber
-                    };
-
-                    teamRoleAssignments.Add(newData);
-                    Debug.Log(playerDataNetworkList.Name + " " + newData.team + " " + newData.role + " " + newData.teamNumber);
+                    Debug.LogError("Ran out of players while forming teams!");
+                    return;
                 }
-            }
 
-            if (teamNumber == 2)
-            {
-                team = TeamType.TeamC;
+                var player = unassignedPlayers[currentPlayerIndex];
+                currentPlayerIndex++;
 
-                for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
+                // Randomly assign role
+                RoleType assignedRole = UnityEngine.Random.value > 0.5f ? RoleType.Driver : RoleType.Shooter;
+
+                // Ensure no duplicate roles inside a team
+                if (Exists(trd => trd.teamNumber == teamNumber && trd.role == assignedRole))
                 {
-
-                    role = roleIndex == 0 ? RoleType.Driver : RoleType.Shooter;
-
-                    roleIndex++;
-
-                    TeamRoleData newData = new TeamRoleData
-                    {
-                        team = team,
-                        role = role,
-                        teamNumber = teamNumber
-                    };
-
-                    teamRoleAssignments.Add(newData);
-                    Debug.Log(playerDataNetworkList.Name + " " + newData.team + " " + newData.role + " " + newData.teamNumber);
+                    assignedRole = assignedRole == RoleType.Driver ? RoleType.Shooter : RoleType.Driver;
                 }
-            }
 
-            if (teamNumber == 3)
-            {
-                team = TeamType.TeamD;
-
-                for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
+                TeamRoleData assignment = new TeamRoleData
                 {
+                    clientId = player.clientID,
+                    team = team,
+                    teamNumber = teamNumber,
+                    role = assignedRole
+                };
 
-                    role = roleIndex == 0 ? RoleType.Driver : RoleType.Shooter;
+                teamRoleAssignments.Add(assignment);
 
-                    roleIndex++;
-
-                    TeamRoleData newData = new TeamRoleData
-                    {
-                        team = team,
-                        role = role,
-                        teamNumber = teamNumber
-                    };
-
-                    teamRoleAssignments.Add(newData);
-                    Debug.Log(playerDataNetworkList.Name + " " + newData.team + " " + newData.role + " " + newData.teamNumber);
-                }
-            }   
-
-            if (teamNumber == 4)
-            {
-                team = TeamType.TeamE;
-
-                for (int roleIndex = 0; roleIndex <= 1; roleIndex++)
-                {
-
-                    role = roleIndex == 0 ? RoleType.Driver : RoleType.Shooter;
-
-                    roleIndex++;
-
-                    TeamRoleData newData = new TeamRoleData
-                    {
-                        team = team,
-                        role = role,
-                        teamNumber = teamNumber
-                    };
-
-                    teamRoleAssignments.Add(newData);
-                    Debug.Log(playerDataNetworkList.Name + " " + newData.team + " " + newData.role + " " + newData.teamNumber);
-                }
+                Debug.Log($"Assigned {player.playerName} to {team} as {assignedRole} (ClientID: {player.clientID})");
             }
         }
 
@@ -214,7 +214,6 @@ public class MultiplayerManager : NetworkBehaviour
         {
             response.Approved = false;
             response.Reason = "Game Has Already Started";
-
             return;
         }
 
@@ -229,5 +228,15 @@ public class MultiplayerManager : NetworkBehaviour
     public PlayerData GetPlayerDataFromPlayerIndex(int playerIndex)
     {
         return playerDataNetworkList[playerIndex];
+    }
+
+    public List<TeamRoleData> GetAllTeamAssignments()
+    {
+        List<TeamRoleData> copy = new List<TeamRoleData>();
+        foreach (var assignment in teamRoleAssignments)
+        {
+            copy.Add(assignment);
+        }
+        return copy;
     }
 }

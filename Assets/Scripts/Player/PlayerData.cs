@@ -1,4 +1,5 @@
 using System;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ using UnityEngine;
 public struct PlayerData : IEquatable<PlayerData>, INetworkSerializable
 {
     public ulong clientID;
+    public FixedString64Bytes playerName;
 
     public bool Equals(PlayerData other)
     {

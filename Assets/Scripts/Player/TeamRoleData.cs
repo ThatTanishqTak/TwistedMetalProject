@@ -1,17 +1,16 @@
-using System;
+﻿using System;
 using Unity.Netcode;
-
-/* --MAKE SURE WE REMOVE ALL THE DEBUG STATMENTS BEFORE WE BUILD THE FINAL VERSION-- */
 
 public struct TeamRoleData : IEquatable<TeamRoleData>, INetworkSerializable
 {
     public TeamType team;
     public RoleType role;
     public int teamNumber;
+    public ulong clientId;
 
     public bool Equals(TeamRoleData other)
     {
-        return team == other.team && role == other.role && teamNumber == other.teamNumber;
+        return team == other.team && role == other.role && teamNumber == other.teamNumber && clientId == other.clientId;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -19,8 +18,9 @@ public struct TeamRoleData : IEquatable<TeamRoleData>, INetworkSerializable
         serializer.SerializeValue(ref team);
         serializer.SerializeValue(ref role);
         serializer.SerializeValue(ref teamNumber);
+        serializer.SerializeValue(ref clientId); 
     }
 }
 
-public enum TeamType { None = 0, TeamA, TeamB, TeamC, TeamD, TeamE }
+public enum TeamType { None = 0, TeamA, TeamB, TeamC, TeamD }
 public enum RoleType { None = 0, Driver, Shooter }
