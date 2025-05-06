@@ -10680,6 +10680,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   massMultiplier: 0.8
+  linearDampingMultiplier: 2
+  angularDampingMultiplier: 2
   throttleMultiplier: 0.6
   steeringMultiplier: 0.7
 --- !u!1 &5243857452194934456

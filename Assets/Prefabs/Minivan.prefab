@@ -246,6 +246,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   massMultiplier: 0.8
+  linearDampingMultiplier: 2
+  angularDampingMultiplier: 2
   throttleMultiplier: 0.6
   steeringMultiplier: 0.7
 --- !u!1 &338086867605006288
@@ -1335,7 +1337,7 @@ Transform:
   m_GameObject: {fileID: 4753562262238912766}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.16, z: -2}
+  m_LocalPosition: {x: 0, y: 0.28, z: -3.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2114,7 +2116,7 @@ Transform:
   m_GameObject: {fileID: 8700056742110661603}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.16, z: -2}
+  m_LocalPosition: {x: 0, y: 0.28, z: -3.54}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
