@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 4102947209618519787}
   - component: {fileID: 8930395948568465080}
   - component: {fileID: 6009308636597930049}
+  - component: {fileID: 2954037846159340043}
   m_Layer: 0
   m_Name: Minivan
   m_TagString: PlayerCar
@@ -232,6 +233,21 @@ MonoBehaviour:
   respawnDelay: 5
   currentHealth:
     m_InternalValue: 0
+--- !u!114 &2954037846159340043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205212915637415773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c195bc9aca3882a4589bb1edd1ddc262, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  massMultiplier: 0.8
+  throttleMultiplier: 0.6
+  steeringMultiplier: 0.7
 --- !u!1 &338086867605006288
 GameObject:
   m_ObjectHideFlags: 0

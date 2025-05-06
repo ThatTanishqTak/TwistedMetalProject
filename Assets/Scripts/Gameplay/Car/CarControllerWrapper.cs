@@ -6,6 +6,9 @@ public class CarControllerWrapper : NetworkBehaviour
     [Header("Dependencies")]
     private ICarMovement carMovement;
 
+    public float ThrottleMultiplier { get; set; } = 1f;
+    public float SteeringMultiplier { get; set; } = 1f;
+
     private NetworkVariable<ulong> drivingClientId = new NetworkVariable<ulong>(
         0ul,
         NetworkVariableReadPermission.Everyone,
@@ -32,15 +35,13 @@ public class CarControllerWrapper : NetworkBehaviour
 
     private void Update()
     {
-        // Only clients should send input
         if (!IsClient) return;
 
         if (NetworkManager.Singleton.LocalClientId != drivingClientId.Value)
             return;
 
-        // Gather inputs
-        float throttle = Input.GetAxis("Vertical");
-        float steering = Input.GetAxis("Horizontal");
+        float throttle = Input.GetAxis("Vertical") * ThrottleMultiplier;
+        float steering = Input.GetAxis("Horizontal") * SteeringMultiplier;
         bool handbrake = Input.GetKey(KeyCode.Space);
 
         SendMovementServerRpc(throttle, steering, handbrake);

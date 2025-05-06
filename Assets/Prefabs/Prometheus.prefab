@@ -172,6 +172,11 @@ MonoBehaviour:
   muzzleFlash: {fileID: 8850594954547133972, guid: 01a4188a0451b5c40ba9c47aa08337fd, type: 3}
   rocketStats: {fileID: 11400000, guid: 521f3cfa7ac491f418ed21ccbceaa4ed, type: 2}
   rocketCooldown: 45
+  rocketReady: 1
+  audioSource: {fileID: 0}
+  rifleSound: {fileID: 0}
+  rocketSound: {fileID: 0}
+  lastFireTime: 0
 --- !u!114 &6435065289806950257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10445,6 +10450,7 @@ GameObject:
   - component: {fileID: 4685176296316544831}
   - component: {fileID: 3157975120804710006}
   - component: {fileID: 8369805495648934530}
+  - component: {fileID: -6943763131791195980}
   m_Layer: 0
   m_Name: Prometheus
   m_TagString: PlayerCar
@@ -10661,6 +10667,21 @@ MonoBehaviour:
   respawnDelay: 5
   currentHealth:
     m_InternalValue: 0
+--- !u!114 &-6943763131791195980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5043321348027522718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c195bc9aca3882a4589bb1edd1ddc262, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  massMultiplier: 0.8
+  throttleMultiplier: 0.6
+  steeringMultiplier: 0.7
 --- !u!1 &5243857452194934456
 GameObject:
   m_ObjectHideFlags: 0

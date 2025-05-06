@@ -69,6 +69,7 @@
     <Compile Include="Assets\JMO Assets\WarFX\Demo\Assets\CFX_Demo_RotateCamera.cs" />
     <Compile Include="Assets\Scripts\Events\GameEvents.cs" />
     <Compile Include="Assets\Scripts\User Interface\HealthUIManager.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Sandstorm\StormController.cs" />
     <Compile Include="Assets\Scripts\Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Turret\ShooterCameraController.cs" />
     <Compile Include="Assets\Scripts\Player\TeamRoleData.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Assets\Scripts\Multiplayer\NetworkUI.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoCarController.cs" />
     <Compile Include="Assets\Scripts\Audio\ExplosionSoundHelper.cs" />
+    <Compile Include="Assets\Scripts\Gameplay\Sandstorm\TornadoController.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement_Test.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Shooting\IShooter.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Assets\JMO Assets\WarFX\Demo\Assets\WFX_Demo_New.cs" />
     <Compile Include="Assets\Scripts\Manager\MenuMusicManager.cs" />
     <Compile Include="Assets\JMO Assets\WarFX\Demo\Assets\CFX_Demo_Translate.cs" />
+    <Compile Include="Assets\Scripts\Manager\SandstormManager.cs" />
     <Compile Include="Assets\JMO Assets\WarFX\Demo\Assets\CFX_Demo_RandomDir.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterReady.cs" />
     <Compile Include="Assets\JMO Assets\WarFX\Spawn System\CFX_SpawnSystem.cs" />
