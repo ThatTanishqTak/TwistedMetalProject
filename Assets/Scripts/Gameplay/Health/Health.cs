@@ -98,6 +98,12 @@ public class Health : NetworkBehaviour, IDamageable
     {
         SetVisuals(false);
         OnDied?.Invoke();
+        PlayDeathExplosionClientRpc(transform.position);
+    }
+    [ClientRpc]
+    private void PlayDeathExplosionClientRpc(Vector3 position)
+    {
+       ExplosionSoundHelper.PlayExplosion(position);
     }
 
     [ClientRpc]

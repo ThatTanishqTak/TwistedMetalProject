@@ -103,6 +103,7 @@
     <Compile Include="Assets\Scripts\Manager\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\NetworkUI.cs" />
     <Compile Include="Assets\PROMETEO - Car Controller\Scripts\PrometeoCarController.cs" />
+    <Compile Include="Assets\Scripts\Audio\ExplosionSoundHelper.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement_Test.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerData.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Shooting\IShooter.cs" />

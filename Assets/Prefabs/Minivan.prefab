@@ -643,6 +643,11 @@ MonoBehaviour:
   muzzleFlash: {fileID: 8850594954547133972, guid: 01a4188a0451b5c40ba9c47aa08337fd, type: 3}
   rocketStats: {fileID: 11400000, guid: 521f3cfa7ac491f418ed21ccbceaa4ed, type: 2}
   rocketCooldown: 45
+  rocketReady: 1
+  audioSource: {fileID: 0}
+  rifleSound: {fileID: 0}
+  rocketSound: {fileID: 0}
+  lastFireTime: 0
 --- !u!114 &5465524118255197828
 MonoBehaviour:
   m_ObjectHideFlags: 0

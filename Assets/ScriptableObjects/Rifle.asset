@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rifle
   m_EditorClassIdentifier: 
   weaponName: Rifle
-  fireRate: 1.2
-  damage: 25
+  fireRate: 0.3
+  damage: 15
   bulletRange: 70
   ammo: -1
