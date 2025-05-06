@@ -51583,6 +51583,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Floor4m51
       objectReference: {fileID: 0}
+    - target: {fileID: 1030977086, guid: abc00000000017321367335025122024, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 1030977087, guid: abc00000000017321367335025122024, type: 3}
       propertyPath: m_LocalScale.x
       value: 2
@@ -51622,6 +51626,10 @@ PrefabInstance:
     - target: {fileID: 1030977087, guid: abc00000000017321367335025122024, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1030977089, guid: abc00000000017321367335025122024, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
