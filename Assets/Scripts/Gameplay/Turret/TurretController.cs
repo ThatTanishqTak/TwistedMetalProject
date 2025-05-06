@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -16,11 +17,15 @@ public class TurretController : NetworkBehaviour
 
     [Header("Shooter Reference")]
     [SerializeField] private Shooter shooter;
-    [SerializeField] private GunStats gunStats;
+    [SerializeField] private GunStats gunStats;             
 
     [Header("VFX")]
-    [Tooltip("Assign a muzzle-flash ParticleSystem here, parented at the shoot point")]
-    [SerializeField] private ParticleSystem muzzleFlash;
+    [SerializeField] private ParticleSystem muzzleFlash;    
+
+    [Header("Rocket Settings")]
+    [SerializeField] private GunStats rocketStats;          
+    [SerializeField] private float rocketCooldown = 45f;     
+    private bool rocketReady = true;
 
     private float lastFireTime;
 
@@ -53,6 +58,14 @@ public class TurretController : NetworkBehaviour
                 FireServerRpc();
             }
         }
+
+        if (Input.GetMouseButtonDown(1) && rocketReady)
+        {
+            rocketReady = false;
+            FireRocketServerRpc();
+            Debug.Log("[TurretController] Rocket launched");
+            StartCoroutine(RocketReloadCoroutine());
+        }
     }
 
     private void LateUpdate()
@@ -65,8 +78,7 @@ public class TurretController : NetworkBehaviour
     private void UpdateRotationServerRpc(float yawDelta, float pitchDelta)
     {
         float newYaw = (baseRotation.Value.eulerAngles.y + yawDelta) % 360f;
-        float newPitch = Mathf.Clamp(headPitch.Value - pitchDelta,
-                                     minPitch, maxPitch);
+        float newPitch = Mathf.Clamp(headPitch.Value - pitchDelta, minPitch, maxPitch);
 
         baseRotation.Value = Quaternion.Euler(0f, newYaw, 0f);
         headPitch.Value = newPitch;
@@ -75,16 +87,12 @@ public class TurretController : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void FireServerRpc()
     {
-        if (Physics.Raycast(shootPoint.position,
-                            shootPoint.forward,
-                            out var hit,
-                            gunStats.bulletRange))
+        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out var hit, gunStats.bulletRange))
         {
             if (hit.transform.TryGetComponent<IDamageable>(out var target))
             {
                 target.TakeDamage(gunStats.damage);
-                Debug.Log($"[Server] Hit {hit.transform.name} for {gunStats.damage} " +
-                          $"(remaining {target.CurrentHealth})");
+                Debug.Log($"[Server] Hit {hit.transform.name} for {gunStats.damage} (remaining {target.CurrentHealth})");
             }
             else
             {
@@ -99,22 +107,47 @@ public class TurretController : NetworkBehaviour
         MuzzleFlashClientRpc();
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void FireRocketServerRpc()
+    {
+        if (Physics.Raycast(shootPoint.position, shootPoint.forward, out var hit, rocketStats.bulletRange))
+        {
+            if (hit.transform.TryGetComponent<IDamageable>(out var target))
+            {
+                target.TakeDamage(rocketStats.damage);
+                Debug.Log($"[Server] Rocket hit {hit.transform.name} for {rocketStats.damage} (remaining {target.CurrentHealth})");
+            }
+            else
+            {
+                Debug.Log($"[Server] Rocket hit {hit.transform.name}, not damageable");
+            }
+        }
+        else
+        {
+            Debug.Log("[Server] Rocket missed");
+        }
+    }
+
     [ClientRpc]
     private void MuzzleFlashClientRpc()
     {
         if (muzzleFlash == null)
         {
-            Debug.LogWarning("[TurretController] MuzzleFlash is null!");
+            Debug.LogWarning("[TurretController] No muzzleFlash assigned!");
             return;
         }
 
         muzzleFlash.transform.position = shootPoint.position;
         muzzleFlash.transform.rotation = shootPoint.rotation;
-
         muzzleFlash.Clear();
         muzzleFlash.Emit(1);
-
-        Debug.Log($"[TurretController] Emitted muzzle flash at {shootPoint.position}");
+        Debug.Log($"[TurretController] Played muzzle flash at {shootPoint.position}");
     }
 
+    private IEnumerator RocketReloadCoroutine()
+    {
+        yield return new WaitForSeconds(rocketCooldown);
+        rocketReady = true;
+        Debug.Log("[TurretController] Rocket loaded");
+    }
 }

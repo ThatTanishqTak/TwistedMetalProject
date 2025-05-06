@@ -169,6 +169,8 @@ MonoBehaviour:
   shooter: {fileID: 6435065289806950257}
   gunStats: {fileID: 11400000, guid: ea4ace5d6a1b9004ea6a24887fa872f3, type: 2}
   muzzleFlash: {fileID: 8850594954547133972, guid: 01a4188a0451b5c40ba9c47aa08337fd, type: 3}
+  rocketStats: {fileID: 11400000, guid: 521f3cfa7ac491f418ed21ccbceaa4ed, type: 2}
+  rocketCooldown: 45
 --- !u!114 &6435065289806950257
 MonoBehaviour:
   m_ObjectHideFlags: 0
