@@ -96,6 +96,7 @@
     <Compile Include="Assets\Scripts\Gameplay\Shooting\Shooter.cs" />
     <Compile Include="Assets\Scripts\Gameplay\Shooting\Gun.cs" />
     <Compile Include="Assets\project level\project level 1\Assets\Scripts\Utilities.cs" />
+    <Compile Include="Assets\Sandstorm\EzTornado\Scripts\PerlinNoiseMesh.cs" />
     <Compile Include="Assets\project level\project level 1\Assets\Scripts\InstancedMesh.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\CharacterSelectUI.cs" />
     <Compile Include="Assets\Scripts\Core\Interfaces\CarAdapter.cs" />
